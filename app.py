@@ -755,8 +755,8 @@ async def run_defend(req: DefendRequest):
         defended_success = success
         defended_matched = matched
 
-        if defense_results["any_detected"]:
-            # Re-run with hardened prompt if hardening was selected
+        if defense_results["any_detected"] or "hardening" in req.defenses:
+            # Re-run with hardened prompt if hardening was selected or defenses detected issues
             if "hardening" in req.defenses:
                 hardened = defense_results["defenses"].get("hardening", {})
                 hardened_system = hardened.get("hardened_system_prompt", system)
