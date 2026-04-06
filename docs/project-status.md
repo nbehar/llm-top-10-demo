@@ -1,12 +1,12 @@
 # Project Status — LLM Top 10 Security Lab
 
-*Last updated: 2026-04-06*
+*Last updated: 2026-04-06 (Session 1, continued)*
 
 ---------------------------------------------------------------------
 
 ## Current Phase
 
-**Specs complete. Implementation not started.**
+**Core backend implemented. Attack testing and frontend next.**
 
 ---------------------------------------------------------------------
 
@@ -35,16 +35,16 @@
 
 | Component | File(s) | Status |
 |-----------|---------|--------|
-| ATTACKS dict + build_messages + check_success | `app.py` | ⬜ Not started |
-| FastAPI routes (/api/attack, /api/attacks, /api/custom) | `app.py` | ⬜ Not started |
-| Scorecard route + SSE streaming | `app.py` | ⬜ Not started |
+| ATTACKS dict + build_messages + check_success | `app.py` | ✅ Done |
+| FastAPI routes (/api/attack, /api/attacks, /api/custom) | `app.py` | ✅ Done |
+| Scorecard route (sync, SSE pending) | `app.py` | 🔧 Partial |
 | Defense route (/api/defend) | `app.py` | ⬜ Not started |
 | Meta Prompt Guard 2 integration | `scanner.py` | ⬜ Not started |
 | LLM Guard output scanner integration | `scanner.py` | ⬜ Not started |
 | LLM Guard context scanner integration | `scanner.py` | ⬜ Not started |
 | System prompt hardening logic | `scanner.py` | ⬜ Not started |
 | Guardrail model logic | `scanner.py` | ⬜ Not started |
-| HTML template | `templates/index.html` | ⬜ Not started |
+| HTML template | `templates/index.html` | 🔧 Placeholder |
 | CSS dark theme | `static/css/styles.css` | ⬜ Not started |
 | JS app logic (sidebar, forms, results) | `static/js/app.js` | ⬜ Not started |
 | JS i18n (EN/ES) | `static/js/i18n.js` | ⬜ Not started |
@@ -90,7 +90,9 @@ None yet.
 
 ## Next Recommended Task
 
-**Step 1:** Implement `app.py` — ATTACKS dict with all 11 scenarios, `build_messages()`, `check_success()`, `generate_response()`, and the `/api/attack` + `/api/attacks` routes. This is the core backend that everything else depends on.
+**Step 2:** Test each attack against LLaMA 3.3 70B via Groq to verify they actually work. Update the attack verification table. File GitHub issues for any attacks that need prompt tuning.
+
+Alternative: proceed to Phase 2 (frontend) and test attacks through the UI.
 
 ---------------------------------------------------------------------
 
