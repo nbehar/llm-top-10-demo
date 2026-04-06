@@ -84,7 +84,7 @@
 
 | Defense Tool | Integrated? | Tested? | Notes |
 |--------------|-------------|---------|-------|
-| Meta Prompt Guard 2 | ✅ | ⏳ | Gated model — awaiting Meta license approval. Code ready (v2 86M + HF_TOKEN). |
+| Meta Prompt Guard 2 | ✅ | ✅ | 2/10 detected (LLM01a, LLM07). Exact spec match. v2 86M via HF_TOKEN. |
 | LLM Guard — Output | ✅ | ✅ | 10/10 detected. Regex patterns catch creds, code, actions, business secrets. |
 | LLM Guard — Context | ✅ | ✅ | 4/10 detected (LLM01b, LLM03, LLM04, LLM08). Matches spec + bonus LLM03. |
 | System Prompt Hardening | ✅ | ✅ | 5/10 blocked (LLM01a, LLM01b, LLM02, LLM04, LLM07). Re-runs with XML tags. |
