@@ -126,7 +126,14 @@ def scan_input(user_prompt: str) -> dict:
         top = results[0] if results else {"label": "BENIGN", "score": 0.0}
         label = top.get("label", "BENIGN").upper()
         score = top.get("score", 0.0)
-        detected = label in ("MALICIOUS", "INJECTION", "JAILBREAK") and score > 0.5
+        # v2 uses LABEL_0=benign, LABEL_1=malicious; v1 uses INJECTION/JAILBREAK
+        is_malicious = label in ("MALICIOUS", "INJECTION", "JAILBREAK", "LABEL_1")
+        detected = is_malicious and score > 0.5
+        # Normalize label for display
+        if label == "LABEL_1":
+            label = "MALICIOUS"
+        elif label == "LABEL_0":
+            label = "BENIGN"
 
         return {
             "tool": "Meta Prompt Guard 2",
