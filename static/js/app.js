@@ -100,11 +100,11 @@ async function runAttack(attackId, userPrompt, canary) {
   });
 }
 
-async function runDefend(attackId, userPrompt, canary) {
+async function runDefend(attackId, userPrompt, canary, defenses) {
   return fetchJSON("/api/defend", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ attack_id: attackId, user_prompt: userPrompt || undefined, canary }),
+    body: JSON.stringify({ attack_id: attackId, user_prompt: userPrompt || undefined, canary, defenses }),
   });
 }
 
@@ -436,9 +436,10 @@ function renderDefendMode() {
 
     const userPrompt = $("#user-prompt-d")?.value || atk.default_user_prompt;
     const canary = $("#canary-d")?.value || "BANANA SUNDAE";
+    const defenses = [...$$(".defense-toggle input:checked")].map((cb) => cb.value);
 
     try {
-      const result = await runDefend(atk.id, userPrompt, canary);
+      const result = await runDefend(atk.id, userPrompt, canary, defenses);
       state.running = false;
       renderDefendMode();
       const area = $("#defend-results");
@@ -453,11 +454,66 @@ function renderDefendMode() {
 
 function renderDefendResult(r) {
   const lang = state.lang;
-  // Placeholder — will be fully built when /api/defend is implemented
+  const scanner = r.scanner || {};
+
+  // Undefended result
+  const undefIcon = r.undefended?.success ? "\ud83d\udea8" : "\u2705";
+  const undefText = r.undefended?.success ? t("verdict_succeeded", lang) : t("verdict_blocked", lang);
+  const undefClass = r.undefended?.success ? "verdict--succeeded" : "verdict--blocked";
+
+  // Per-defense results
+  let defensePanels = "";
+  const defenseOrder = ["input_scan", "context_scan", "hardening", "output_scan", "guardrail"];
+  for (const key of defenseOrder) {
+    const d = scanner[key];
+    if (!d) continue;
+    const icon = d.detected ? "\ud83d\udee1\ufe0f" : (d.action === "applied" ? "\ud83d\udd12" : "\u2705");
+    const statusColor = d.detected ? "var(--green)" : (d.action === "applied" ? "var(--blue)" : "var(--text-muted)");
+    const riskBar = d.risk_score > 0 ? `<div class="progress" style="margin:8px 0;height:4px;"><div class="progress__bar" style="width:${Math.round(d.risk_score * 100)}%;background:${d.detected ? 'var(--green)' : 'var(--text-muted)'};"></div></div>` : "";
+
+    let extraDetails = "";
+    if (d.violations && d.violations.length > 0) {
+      extraDetails = `<div style="margin-top:6px;font-size:12px;color:var(--text-muted);">${d.violations.map((v) => `\u2022 ${escapeHtml(v)}`).join("<br>")}</div>`;
+    }
+    if (d.findings && d.findings.length > 0) {
+      extraDetails = `<div style="margin-top:6px;font-size:12px;color:var(--text-muted);">${d.findings.map((f) => `\u2022 ${escapeHtml(f.type)}${f.matched ? ": " + escapeHtml(f.matched.join(", ")) : ""}`).join("<br>")}</div>`;
+    }
+    if (d.flagged_docs && d.flagged_docs.length > 0) {
+      extraDetails = `<div style="margin-top:6px;font-size:12px;color:var(--text-muted);">${d.flagged_docs.map((fd) => `\u2022 Doc ${fd.doc_index}: ${fd.findings.map((f) => f.type).join(", ")}`).join("<br>")}</div>`;
+    }
+
+    defensePanels += `
+      <div style="padding:12px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-weight:500;color:${statusColor};">${icon} ${escapeHtml(d.tool)}</span>
+          <span style="font-size:12px;color:var(--text-muted);">${escapeHtml(d.action)}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-sec);margin-top:4px;">${escapeHtml(d.details)}</div>
+        ${riskBar}${extraDetails}
+      </div>`;
+  }
+
+  // Defended result
+  const defIcon = r.defended?.success ? "\ud83d\udea8" : "\u2705";
+  const defText = r.defended?.success ? t("verdict_succeeded", lang) : t("verdict_blocked", lang);
+  const defClass = r.defended?.success ? "verdict--succeeded" : "verdict--blocked";
+
   return `
     <div class="card fade-in">
-      <div class="card__header"><span class="card__title">${t("title_effect", lang)}</span></div>
-      <div class="card__text">${escapeHtml(JSON.stringify(r, null, 2))}</div>
+      <div class="card__header"><span class="card__title">\u2460 Without Defense</span></div>
+      <div class="${undefClass}">${undefIcon} ${undefText}</div>
+      <div class="model-output" style="margin-top:12px;max-height:200px;overflow-y:auto;">${escapeHtml(r.undefended?.model_output || "")}</div>
+    </div>
+
+    <div class="card fade-in">
+      <div class="card__header"><span class="card__title">\u2461 Defense Results</span></div>
+      ${defensePanels || '<div class="card__text">No defenses selected.</div>'}
+    </div>
+
+    <div class="card fade-in">
+      <div class="card__header"><span class="card__title">\u2462 With Defense</span></div>
+      <div class="${defClass}">${defIcon} ${defText}</div>
+      <div class="model-output" style="margin-top:12px;max-height:200px;overflow-y:auto;">${escapeHtml(r.defended?.model_output || "")}</div>
     </div>`;
 }
 

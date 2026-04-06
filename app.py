@@ -20,6 +20,8 @@ from fastapi.templating import Jinja2Templates
 from groq import Groq
 from pydantic import BaseModel
 
+from scanner import run_defenses, harden_prompt
+
 # =============================================================================
 # LOGGING
 # =============================================================================
@@ -638,6 +640,13 @@ class CustomRequest(BaseModel):
     canary: str = DEFAULT_CANARY
 
 
+class DefendRequest(BaseModel):
+    attack_id: str
+    user_prompt: Optional[str] = None
+    canary: str = DEFAULT_CANARY
+    defenses: list[str] = ["prompt_guard", "output_scan", "context_scan", "hardening", "guardrail"]
+
+
 class ScorecardRequest(BaseModel):
     canary: str = DEFAULT_CANARY
 
@@ -692,6 +701,102 @@ async def run_attack(req: AttackRequest):
         }
     except Exception as e:
         logger.exception(f"Error running attack {req.attack_id}")
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@app.post("/api/defend")
+async def run_defend(req: DefendRequest):
+    """Run an attack with and without selected defenses."""
+    if req.attack_id not in ATTACKS:
+        raise HTTPException(status_code=400, detail=f"Unknown attack_id: {req.attack_id}")
+
+    attack = ATTACKS[req.attack_id]
+    user_prompt = req.user_prompt or attack["default_user_prompt"]
+    canary = req.canary or DEFAULT_CANARY
+
+    try:
+        # 1. Run undefended
+        messages = build_messages(attack, user_prompt, canary)
+        response = generate_response(messages)
+        success, matched = check_success(response, attack, canary)
+
+        undefended = {
+            "model_output": response,
+            "success": success,
+            "verdict": "ATTACK_SUCCEEDED" if success else "ATTACK_BLOCKED",
+        }
+
+        # 2. Prepare context docs (formatted with canary)
+        context_docs = None
+        if attack.get("context_documents"):
+            context_docs = [
+                doc.format(canary=canary) if "{canary}" in doc else doc
+                for doc in attack["context_documents"]
+            ]
+
+        # 3. Format system prompt (with canary)
+        system = attack["system_prompt"]
+        if "{canary}" in system:
+            system = system.format(canary=canary)
+        formatted_prompt = user_prompt.format(canary=canary) if "{canary}" in user_prompt else user_prompt
+
+        # 4. Run defenses on undefended output
+        defense_results = run_defenses(
+            user_prompt=formatted_prompt,
+            system_prompt=system,
+            context_documents=context_docs,
+            model_output=response,
+            selected_defenses=req.defenses,
+            generate_fn=generate_response,
+        )
+
+        # 5. If hardening is active, re-run with hardened prompt
+        defended_response = response
+        defended_success = success
+        defended_matched = matched
+
+        if defense_results["any_detected"]:
+            # Re-run with hardened prompt if hardening was selected
+            if "hardening" in req.defenses:
+                hardened = defense_results["defenses"].get("hardening", {})
+                hardened_system = hardened.get("hardened_system_prompt", system)
+                hardened_context = hardened.get("hardened_context")
+
+                defended_system = hardened_system
+                if hardened_context:
+                    defended_system = f"{hardened_system}\n\n{hardened_context}"
+                elif context_docs:
+                    defended_system = f"{hardened_system}\n\n" + "\n\n".join(context_docs)
+
+                defended_messages = [
+                    {"role": "system", "content": defended_system},
+                    {"role": "user", "content": formatted_prompt},
+                ]
+                defended_response = generate_response(defended_messages)
+                defended_success, defended_matched = check_success(defended_response, attack, canary)
+            else:
+                # If no hardening but defenses detected issues, the output is still flagged
+                defended_response = response
+                defended_success = success
+                defended_matched = matched
+
+        defended = {
+            "model_output": defended_response,
+            "success": defended_success,
+            "verdict": "ATTACK_SUCCEEDED" if defended_success else "ATTACK_BLOCKED",
+        }
+
+        return {
+            "attack_id": req.attack_id,
+            "owasp_id": attack["owasp_id"],
+            "attack_name": attack["label"],
+            "undefended": undefended,
+            "scanner": defense_results["defenses"],
+            "defended": defended,
+            "any_detected": defense_results["any_detected"],
+        }
+    except Exception as e:
+        logger.exception(f"Error running defend {req.attack_id}")
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
 
 
