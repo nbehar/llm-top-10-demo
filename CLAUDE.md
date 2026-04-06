@@ -500,6 +500,35 @@ Attack must actually succeed against the model for the demo to work.
 - Commit messages describe what changed and why
 - Specs committed before implementation code
 
+## Issue Tracking (MANDATORY)
+
+Claude MUST create a GitHub issue when:
+
+- An attack fails to work against the model (spec says it should succeed)
+- A defense tool doesn't detect what the effectiveness matrix says it should
+- A spec is ambiguous or contradicts another spec
+- A library/dependency has a breaking change or compatibility issue
+- Model behavior changes between runs (non-deterministic failure)
+- HF Spaces deployment fails or behaves differently than local
+- Frontend rendering breaks on mobile or specific browsers
+- Any blocker that prevents completing the current task
+
+Issues MUST include:
+
+```
+**Spec reference:** which spec file this relates to
+**Problem:** what went wrong
+**Expected:** what should have happened (per spec)
+**Actual:** what actually happened
+**Evidence:** error messages, model output, screenshots (no secrets)
+**Reproduction:** steps to trigger the issue
+**Severity:** blocker / bug / enhancement
+```
+
+Use `gh issue create` via CLI. Apply labels: `bug`, `blocker`, `spec-mismatch`, `model-behavior`, `defense-tool`, `frontend`, `deployment`.
+
+Claude MUST NOT silently work around a problem. If it's worth a workaround, it's worth an issue.
+
 ---------------------------------------------------------------------
 
 # Default Startup Behavior
