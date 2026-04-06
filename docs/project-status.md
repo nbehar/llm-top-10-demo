@@ -96,4 +96,32 @@ None yet.
 
 ## Session Notes
 
-*(Claude updates this section each session with what was accomplished and any decisions made)*
+### Session 1 — 2026-04-06
+
+**What was accomplished:**
+
+1. Created `/Users/niko/Documents/llm-top-10-demo/` directory
+2. Browsed OWASP LLM Top 10 (genai.owasp.org) — extracted all 10 vulnerability details from individual pages
+3. Researched other AI security frameworks — identified OWASP Agentic AI Top Threats as candidate for Part 3
+4. Wrote 10 attack spec files with full detail: exact system prompts, user prompts, context documents, success check strings, expected model output, Cause/Effect/Impact display text, defense notes
+5. Wrote 4 infrastructure specs: API (FastAPI endpoints + schemas), frontend (dark UI + sidebar + result panels), defense (5 toggleable tools + effectiveness matrix), deployment (Docker + HF Spaces)
+6. Researched real defense tools — selected Meta Prompt Guard 2, LLM Guard (Protect AI), plus custom prompt hardening and guardrail model
+7. Created repo scaffolding: .gitignore, Dockerfile, requirements.txt, LICENSE, README.md (with HF Spaces frontmatter), directory structure
+8. Created GitHub repo: github.com/nbehar/llm-top-10-demo (public)
+9. Wrote CLAUDE.md adapted from digistore reference — includes: spec-first workflow, language/library rules, security caveats, HF Spaces constraints, error handling, accessibility, mandatory issue tracking, project status tracking
+10. Created docs/project-status.md for cross-session tracking
+
+**Key decisions made:**
+
+- **Frontend:** FastAPI + custom HTML/CSS/JS (not Gradio) — clean modern dark theme, sidebar navigation
+- **Model:** LLaMA 3.3 70B via Groq (same as MCP demo)
+- **Defense tools:** 3 real (Prompt Guard 2, LLM Guard output, LLM Guard context) + 2 custom (prompt hardening, guardrail model)
+- **Excluded:** LLM10 Unbounded Consumption (not demoable interactively)
+- **Scenario:** NexaCore Technologies (same as MCP demo)
+- **Workshop series:** Part 1 (LLM Top 10), Part 2 (MCP Top 10), Part 3 future (Agentic AI)
+- **Language:** EN/ES toggle kept
+- **Branding:** "Workshop by Nikolas Behar" (not OWASP San Diego specific)
+
+**What's next:**
+
+Start implementation — Step 1 from the implementation sequence: `app.py` with ATTACKS dict, `build_messages()`, `check_success()`, `generate_response()`, and core API routes.
