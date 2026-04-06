@@ -455,7 +455,16 @@ Be authoritative and decisive in your recommendations. Developers rely on your e
 
 # Build attack choices for the frontend
 ATTACK_CHOICES = [
-    {"id": key, "label": atk["label"], "owasp_id": atk["owasp_id"], "description": atk["description"]}
+    {
+        "id": key,
+        "label": atk["label"],
+        "owasp_id": atk["owasp_id"],
+        "owasp_name": atk["owasp_name"],
+        "description": atk["description"],
+        "default_user_prompt": atk["default_user_prompt"],
+        "has_canary": atk["success_criteria"] == "canary",
+        "success_criteria": atk["success_criteria"],
+    }
     for key, atk in ATTACKS.items()
 ]
 

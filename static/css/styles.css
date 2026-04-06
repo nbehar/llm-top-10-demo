@@ -1,0 +1,738 @@
+/* =============================================================================
+   LLM Top 10 Security Lab — Styles
+   Dark theme, Linear/Vercel-inspired
+   ============================================================================= */
+
+/* -- Tokens ---------------------------------------------------------------- */
+:root {
+  --bg:             #0a0a0b;
+  --surface:        #141416;
+  --surface-el:     #1c1c1f;
+  --border:         #27272a;
+  --border-active:  #3f3f46;
+
+  --text:           #fafafa;
+  --text-sec:       #a1a1aa;
+  --text-muted:     #71717a;
+
+  --blue:           #3b82f6;
+  --green:          #22c55e;
+  --red:            #ef4444;
+  --amber:          #f59e0b;
+  --purple:         #a855f7;
+
+  --font:           Inter, system-ui, -apple-system, sans-serif;
+  --mono:           'JetBrains Mono', 'Fira Code', monospace;
+
+  --radius:         8px;
+  --radius-sm:      6px;
+  --radius-xs:      4px;
+
+  --sidebar-w:      260px;
+  --header-h:       48px;
+}
+
+/* -- Reset ----------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* -- Layout ---------------------------------------------------------------- */
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* -- Header ---------------------------------------------------------------- */
+.header {
+  height: var(--header-h);
+  min-height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+}
+
+.header__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header__title span {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* -- Language Toggle ------------------------------------------------------- */
+.lang-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.lang-toggle__btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lang-toggle__btn--active {
+  background: var(--surface-el);
+  color: var(--text);
+}
+
+/* -- Body (sidebar + main) ------------------------------------------------ */
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* -- Sidebar --------------------------------------------------------------- */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar__attacks {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.sidebar__modes {
+  border-top: 1px solid var(--border);
+  padding: 8px;
+}
+
+/* -- Attack items ---------------------------------------------------------- */
+.attack-item {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-left: 3px solid transparent;
+  margin-bottom: 2px;
+}
+
+.attack-item:hover {
+  background: var(--surface-el);
+}
+
+.attack-item--active {
+  background: var(--surface-el);
+  border-left-color: var(--blue);
+}
+
+.attack-item__id {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.attack-item__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.attack-item__badge {
+  font-size: 10px;
+  color: var(--purple);
+  margin-top: 2px;
+}
+
+.attack-item__status {
+  font-size: 12px;
+}
+
+.attack-item__status--pending { color: var(--text-muted); }
+.attack-item__status--success { color: var(--green); }
+.attack-item__status--fail    { color: var(--red); }
+
+/* -- Mode buttons ---------------------------------------------------------- */
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-sec);
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mode-btn:hover {
+  background: var(--surface-el);
+  color: var(--text);
+}
+
+.mode-btn--active {
+  background: var(--surface-el);
+  border-left-color: var(--blue);
+  color: var(--text);
+}
+
+.mode-btn__icon {
+  font-size: 15px;
+  width: 20px;
+  text-align: center;
+}
+
+/* -- Main Panel ------------------------------------------------------------ */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* -- Attack Header --------------------------------------------------------- */
+.attack-header {
+  margin-bottom: 20px;
+}
+
+.attack-header__owasp {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--purple);
+  background: rgba(168, 85, 247, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.attack-header__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.attack-header__desc {
+  font-size: 14px;
+  color: var(--text-sec);
+}
+
+/* -- Form ------------------------------------------------------------------ */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sec);
+  margin-bottom: 6px;
+}
+
+.form-group__hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+textarea, input[type="text"] {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 12px;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+textarea:focus, input[type="text"]:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+textarea { min-height: 100px; }
+
+/* -- Buttons --------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--blue);
+  color: #fff;
+  width: 100%;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+/* -- Spinner --------------------------------------------------------------- */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* -- Result Cards ---------------------------------------------------------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.card__badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.card__text {
+  font-size: 14px;
+  color: var(--text-sec);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.card__text:last-child { margin-bottom: 0; }
+
+/* -- Code blocks (Cause panel) --------------------------------------------- */
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-sec);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 12px;
+}
+
+.code-block__label {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+/* -- Injection callout (red left border) ----------------------------------- */
+.injection-callout {
+  border-left: 3px solid var(--red);
+  background: rgba(239, 68, 68, 0.06);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-sec);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 12px;
+}
+
+.injection-callout__label {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--red);
+  margin-bottom: 6px;
+}
+
+/* -- Canary / secret badge ------------------------------------------------- */
+.badge-canary {
+  display: inline;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--red);
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* -- Impact verdict -------------------------------------------------------- */
+.verdict--succeeded {
+  color: var(--red);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.verdict--blocked {
+  color: var(--green);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* -- Full prompt collapsible ----------------------------------------------- */
+.collapsible {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.collapsible__trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: none;
+  color: var(--text-sec);
+  font-family: var(--font);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.collapsible__trigger:hover {
+  background: var(--surface-el);
+}
+
+.collapsible__arrow {
+  transition: transform 0.2s;
+  font-size: 11px;
+}
+
+.collapsible--open .collapsible__arrow {
+  transform: rotate(90deg);
+}
+
+.collapsible__body {
+  display: none;
+  padding: 16px;
+  background: var(--bg);
+}
+
+.collapsible--open .collapsible__body {
+  display: block;
+}
+
+/* -- Skeleton loading ------------------------------------------------------ */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-el) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius);
+  min-height: 120px;
+  margin-bottom: 16px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* -- Scorecard ------------------------------------------------------------- */
+.scorecard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.scorecard-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.scorecard-table td {
+  padding: 10px 12px;
+  color: var(--text-sec);
+  border-bottom: 1px solid var(--border);
+}
+
+.scorecard-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* -- Progress bar ---------------------------------------------------------- */
+.progress {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* -- Score summary --------------------------------------------------------- */
+.score-summary {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 16px;
+}
+
+/* -- Defense panels -------------------------------------------------------- */
+.defense-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.defense-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-sec);
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.defense-toggle:hover {
+  background: var(--surface-el);
+}
+
+.defense-toggle--active {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.defense-toggle input {
+  display: none;
+}
+
+/* -- Custom mode ----------------------------------------------------------- */
+.model-output {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-sec);
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 80px;
+}
+
+/* -- Empty state ----------------------------------------------------------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+  color: var(--text-muted);
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-state__icon {
+  font-size: 40px;
+  opacity: 0.5;
+}
+
+.empty-state__text {
+  font-size: 15px;
+}
+
+.empty-state__sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* -- Footer ---------------------------------------------------------------- */
+.footer {
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.footer a {
+  color: var(--text-sec);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--text);
+}
+
+/* -- Fade in animation ----------------------------------------------------- */
+.fade-in {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* -- Mobile ---------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+  }
+
+  .main {
+    padding: 16px;
+  }
+
+  .header__title span {
+    display: none;
+  }
+}
+
+/* -- Scrollbar ------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-active);
+}

@@ -1,19 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Top 10 Security Lab</title>
-    <style>
-        body { font-family: system-ui, sans-serif; background: #0a0a0b; color: #fafafa; margin: 0; padding: 40px; }
-        h1 { font-size: 24px; }
-        p { color: #a1a1aa; }
-        code { background: #141416; padding: 2px 6px; border-radius: 4px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Top 10 Security Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
 <body>
-    <h1>LLM Top 10 Security Lab</h1>
-    <p>Backend is running. Frontend coming soon.</p>
-    <p>Try: <code>GET /api/attacks</code> or <code>POST /api/attack</code></p>
+  <div class="layout">
+
+    <!-- Header -->
+    <header class="header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" aria-label="Toggle menu">&#9776;</button>
+        <div class="header__title">
+          <span class="header__title-text">LLM Top 10 Security Lab</span>
+          <span>OWASP</span>
+        </div>
+      </div>
+      <div class="header__right">
+        <div class="lang-toggle">
+          <button class="lang-toggle__btn lang-toggle__btn--active" data-lang="en">EN</button>
+          <button class="lang-toggle__btn" data-lang="es">ES</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Body -->
+    <div class="body">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar__attacks"></div>
+        <div class="sidebar__modes">
+          <button class="mode-btn mode-btn--active" data-mode="attack">
+            <span class="mode-btn__icon">&#9876;&#65039;</span> Attack Lab
+          </button>
+          <button class="mode-btn" data-mode="defend">
+            <span class="mode-btn__icon">&#128737;&#65039;</span> Defense Lab
+          </button>
+          <button class="mode-btn" data-mode="custom">
+            <span class="mode-btn__icon">&#9998;&#65039;</span> Custom Prompt
+          </button>
+          <button class="mode-btn" data-mode="scorecard">
+            <span class="mode-btn__icon">&#128202;</span> Scorecard
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main"></main>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      Workshop by Nikolas Behar &middot; <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noopener">OWASP LLM Top 10</a>
+    </footer>
+
+  </div>
+
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>

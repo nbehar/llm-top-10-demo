@@ -4,6 +4,7 @@ groq>=0.12.0
 jinja2>=3.1.0
 python-multipart>=0.0.12
 sse-starlette>=2.0.0
-llm-guard>=0.3.0
-transformers>=4.40.0
-torch>=2.0.0
+# Heavy deps deferred until scanner.py is implemented (see GitHub issue)
+# llm-guard>=0.3.0
+# transformers>=4.40.0
+# torch>=2.0.0
