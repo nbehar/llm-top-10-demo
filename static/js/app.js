@@ -19,6 +19,8 @@ const state = {
   scorecardResults: null,
   scorecardRunning: false,
   scorecardProgress: { completed: 0, total: 0 },
+  selectedDefenses: [],     // defense IDs selected in Defense Lab
+  lastDefendResult: null,   // last /api/defend response
 };
 
 // =============================================================================
@@ -412,11 +414,13 @@ function renderDefendMode() {
     <div class="form-group">
       <label>${t("label_select_defenses", lang)}</label>
       <div class="defense-toggles">
-        <label class="defense-toggle"><input type="checkbox" value="prompt_guard" /><span>\ud83d\udee1 ${t("defense_prompt_guard", lang)}</span><small>Scans user prompt for injection patterns</small></label>
-        <label class="defense-toggle"><input type="checkbox" value="output_scan" /><span>\ud83d\udcca ${t("defense_output_scan", lang)}</span><small>Scans model response for leaked secrets &amp; dangerous code</small></label>
-        <label class="defense-toggle"><input type="checkbox" value="context_scan" /><span>\ud83d\udcc4 ${t("defense_context_scan", lang)}</span><small>Scans RAG documents for hidden instructions</small></label>
-        <label class="defense-toggle"><input type="checkbox" value="hardening" /><span>\ud83d\udd12 ${t("defense_hardening", lang)}</span><small>Wraps system prompt with boundary tags &amp; refusal rules</small></label>
-        <label class="defense-toggle"><input type="checkbox" value="guardrail" /><span>\ud83e\udd16 ${t("defense_guardrail", lang)}</span><small>Second LLM evaluates response for policy violations</small></label>
+        ${[
+          ["prompt_guard", "\ud83d\udee1", t("defense_prompt_guard", lang), "Scans user prompt for injection patterns"],
+          ["output_scan", "\ud83d\udcca", t("defense_output_scan", lang), "Scans model response for leaked secrets &amp; dangerous code"],
+          ["context_scan", "\ud83d\udcc4", t("defense_context_scan", lang), "Scans RAG documents for hidden instructions"],
+          ["hardening", "\ud83d\udd12", t("defense_hardening", lang), "Wraps system prompt with boundary tags &amp; refusal rules"],
+          ["guardrail", "\ud83e\udd16", t("defense_guardrail", lang), "Second LLM evaluates response for policy violations"],
+        ].map(([id, icon, name, desc]) => `<label class="defense-toggle${state.selectedDefenses.includes(id) ? " defense-toggle--active" : ""}"><input type="checkbox" value="${id}" ${state.selectedDefenses.includes(id) ? "checked" : ""} /><span>${icon} ${name}</span><small>${desc}</small></label>`).join("")}
       </div>
     </div>
     <div class="form-group">
@@ -436,29 +440,40 @@ function renderDefendMode() {
       <div id="defend-results"></div>
     </div>`;
 
-  // Toggle active class on defense labels
+  // Toggle active class on defense labels + persist to state
   $$(".defense-toggle").forEach((label) => {
     const cb = $("input", label);
-    label.classList.toggle("defense-toggle--active", cb.checked);
-    cb.addEventListener("change", () => label.classList.toggle("defense-toggle--active", cb.checked));
+    cb.addEventListener("change", () => {
+      label.classList.toggle("defense-toggle--active", cb.checked);
+      state.selectedDefenses = [...$$(".defense-toggle input:checked")].map((c) => c.value);
+    });
   });
+
+  // Show last result if we have one
+  if (state.lastDefendResult && state.lastDefendResult.attack_id === atk.id) {
+    const area = $("#defend-results");
+    if (area) area.innerHTML = renderDefendResult(state.lastDefendResult);
+  }
 
   // Bind run
   $("#btn-run-defend").addEventListener("click", async () => {
     if (state.running) return;
+    if (state.selectedDefenses.length === 0) {
+      alert("Select at least one defense tool to test.");
+      return;
+    }
     state.running = true;
+    state.lastDefendResult = null;
     renderDefendMode();
 
     const userPrompt = $("#user-prompt-d")?.value || atk.default_user_prompt;
     const canary = $("#canary-d")?.value || "BANANA SUNDAE";
-    const defenses = [...$$(".defense-toggle input:checked")].map((cb) => cb.value);
 
     try {
-      const result = await runDefend(atk.id, userPrompt, canary, defenses);
+      const result = await runDefend(atk.id, userPrompt, canary, state.selectedDefenses);
+      state.lastDefendResult = result;
       state.running = false;
       renderDefendMode();
-      const area = $("#defend-results");
-      if (area) area.innerHTML = renderDefendResult(result);
     } catch (err) {
       state.running = false;
       renderDefendMode();
