@@ -1,12 +1,12 @@
 # Project Status — LLM Top 10 Security Lab
 
-*Last updated: 2026-04-06 (Session 1, continued)*
+*Last updated: 2026-04-06 (Session 1, end)*
 
 ---------------------------------------------------------------------
 
 ## Current Phase
 
-**Core backend implemented. Attack testing and frontend next.**
+**Core backend implemented. Postman collection ready. Frontend and attack testing next.**
 
 ---------------------------------------------------------------------
 
@@ -24,7 +24,7 @@
 | `llm07_system_prompt_leakage.md` | ✅ Written |
 | `llm08_vector_and_embedding_weaknesses.md` | ✅ Written |
 | `llm09_misinformation.md` | ✅ Written |
-| `api_spec.md` | ✅ Written |
+| `api_spec.md` | ✅ Written (updated with Postman reference) |
 | `frontend_spec.md` | ✅ Written |
 | `defense_spec.md` | ✅ Written |
 | `deployment_spec.md` | ✅ Written |
@@ -38,6 +38,8 @@
 | ATTACKS dict + build_messages + check_success | `app.py` | ✅ Done |
 | FastAPI routes (/api/attack, /api/attacks, /api/custom) | `app.py` | ✅ Done |
 | Scorecard route (sync, SSE pending) | `app.py` | 🔧 Partial |
+| Health check (/health) | `app.py` | ✅ Done |
+| Postman collection | `postman/` | ✅ Done (16 requests) |
 | Defense route (/api/defend) | `app.py` | ⬜ Not started |
 | Meta Prompt Guard 2 integration | `scanner.py` | ⬜ Not started |
 | LLM Guard output scanner integration | `scanner.py` | ⬜ Not started |
@@ -48,6 +50,7 @@
 | CSS dark theme | `static/css/styles.css` | ⬜ Not started |
 | JS app logic (sidebar, forms, results) | `static/js/app.js` | ⬜ Not started |
 | JS i18n (EN/ES) | `static/js/i18n.js` | ⬜ Not started |
+| CLAUDE.md | `CLAUDE.md` | ✅ Done (with Postman sync rules) |
 | Docker deployment | `Dockerfile` | ✅ Written |
 | Requirements | `requirements.txt` | ✅ Written |
 
@@ -90,9 +93,9 @@ None yet.
 
 ## Next Recommended Task
 
-**Step 2:** Test each attack against LLaMA 3.3 70B via Groq to verify they actually work. Update the attack verification table. File GitHub issues for any attacks that need prompt tuning.
+**Option A (test first):** Start the server locally, use Postman collection to test each attack against Groq. Update verification table. File issues for prompt tuning.
 
-Alternative: proceed to Phase 2 (frontend) and test attacks through the UI.
+**Option B (frontend first):** Build the frontend (index.html + styles.css + app.js) per frontend_spec.md. Test attacks visually through the UI.
 
 ---------------------------------------------------------------------
 
@@ -106,12 +109,15 @@ Alternative: proceed to Phase 2 (frontend) and test attacks through the UI.
 2. Browsed OWASP LLM Top 10 (genai.owasp.org) — extracted all 10 vulnerability details from individual pages
 3. Researched other AI security frameworks — identified OWASP Agentic AI Top Threats as candidate for Part 3
 4. Wrote 10 attack spec files with full detail: exact system prompts, user prompts, context documents, success check strings, expected model output, Cause/Effect/Impact display text, defense notes
-5. Wrote 4 infrastructure specs: API (FastAPI endpoints + schemas), frontend (dark UI + sidebar + result panels), defense (5 toggleable tools + effectiveness matrix), deployment (Docker + HF Spaces)
+5. Wrote 4 infrastructure specs: API, frontend, defense, deployment
 6. Researched real defense tools — selected Meta Prompt Guard 2, LLM Guard (Protect AI), plus custom prompt hardening and guardrail model
-7. Created repo scaffolding: .gitignore, Dockerfile, requirements.txt, LICENSE, README.md (with HF Spaces frontmatter), directory structure
+7. Created repo scaffolding: .gitignore, Dockerfile, requirements.txt, LICENSE, README.md
 8. Created GitHub repo: github.com/nbehar/llm-top-10-demo (public)
-9. Wrote CLAUDE.md adapted from digistore reference — includes: spec-first workflow, language/library rules, security caveats, HF Spaces constraints, error handling, accessibility, mandatory issue tracking, project status tracking
+9. Wrote CLAUDE.md — spec-first workflow, language/library rules, security caveats, HF Spaces constraints, error handling, accessibility, mandatory issue tracking, project status tracking
 10. Created docs/project-status.md for cross-session tracking
+11. Implemented `app.py` (765 lines) — ATTACKS dict with all 11 scenarios, build_messages(), check_success(), generate_response(), format_cause/effect/impact(), 4 API routes + health check
+12. Created Postman collection (16 requests) — organized by OWASP category, covers all endpoints
+13. Added Postman sync rules to CLAUDE.md and api_spec.md — mandatory update whenever API changes
 
 **Key decisions made:**
 
@@ -123,7 +129,4 @@ Alternative: proceed to Phase 2 (frontend) and test attacks through the UI.
 - **Workshop series:** Part 1 (LLM Top 10), Part 2 (MCP Top 10), Part 3 future (Agentic AI)
 - **Language:** EN/ES toggle kept
 - **Branding:** "Workshop by Nikolas Behar" (not OWASP San Diego specific)
-
-**What's next:**
-
-Start implementation — Step 1 from the implementation sequence: `app.py` with ATTACKS dict, `build_messages()`, `check_success()`, `generate_response()`, and core API routes.
+- **API testing:** Postman collection is the API contract — mandatory sync with code
