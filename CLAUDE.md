@@ -67,6 +67,133 @@ Frontend is API-driven. No business logic in JS.
 
 ---------------------------------------------------------------------
 
+# Language & Library Rules
+
+## Python (Backend)
+
+- Python 3.11+
+- Type hints on all function signatures
+- Pydantic models for API request/response schemas
+- `async def` for all FastAPI route handlers
+- Groq SDK: use `groq.Groq` client, NOT raw HTTP
+- No `print()` for logging — use `logging` module
+- f-strings preferred over `.format()` for non-spec text
+- Spec text (system prompts, injections) uses `.format()` with `{canary}` placeholder
+
+## JavaScript (Frontend)
+
+- Vanilla ES6+ — no build step, no bundler, no npm
+- No jQuery, no React, no framework
+- `fetch()` for all API calls with proper error handling
+- `async/await` over `.then()` chains
+- CSS custom properties for theming (not hardcoded colors in JS)
+- `<script type="module">` for imports between JS files
+- No inline `onclick` — use `addEventListener`
+
+## CSS
+
+- Single `styles.css` file
+- CSS custom properties for all colors (defined in `:root`)
+- Mobile-first responsive design
+- No CSS frameworks (no Tailwind, no Bootstrap)
+- BEM-like class naming: `.attack-card`, `.attack-card__title`, `.attack-card--active`
+- Dark theme is the only theme — no light mode toggle
+
+## Libraries (pinned in requirements.txt)
+
+| Library | Purpose | Notes |
+|---------|---------|-------|
+| `fastapi` | Web framework | Async routes, Pydantic validation |
+| `uvicorn` | ASGI server | Production server |
+| `groq` | Groq API client | LLaMA inference |
+| `jinja2` | Templates | Server-side HTML rendering |
+| `sse-starlette` | SSE support | Scorecard streaming |
+| `llm-guard` | Defense scanner | Output + context scanning |
+| `transformers` | ML models | Meta Prompt Guard 2 |
+| `torch` | ML runtime | Required by transformers |
+
+Do NOT add libraries without updating requirements.txt and this section.
+
+---------------------------------------------------------------------
+
+# Security Considerations
+
+## This App is Intentionally Vulnerable
+
+This is a **security education tool**. The attacks are designed to succeed. Do NOT:
+- Add safety filters that prevent attacks from working
+- Harden the model calls in ways that break the demos
+- Add authentication to the workshop (it's meant to be open)
+
+## What IS Sensitive
+
+- `GROQ_API_KEY` — never commit, never log, never expose in frontend
+- System prompts contain fictional but realistic credentials — always label as `FOR EDUCATIONAL PURPOSES`
+- The Groq API has rate limits — implement client-side throttling to prevent abuse
+
+## What is NOT Sensitive
+
+- NexaCore data is entirely fictional — no real credentials, no real people
+- Attack payloads are educational — they demonstrate known techniques, not zero-days
+- The app is public on HuggingFace Spaces — assume all traffic is untrusted
+
+## API Safety
+
+- Rate limit all endpoints (max 10 req/min per IP for attack endpoints)
+- Validate all inputs with Pydantic — reject malformed requests
+- Set `max_tokens=1024` on all Groq calls — prevent unbounded consumption
+- Timeout Groq calls at 30 seconds
+- Never pass user input to `eval()`, `exec()`, or shell commands
+- Never render model output as raw HTML in the frontend — always escape/sanitize
+
+---------------------------------------------------------------------
+
+# Hosting Constraints (HuggingFace Spaces)
+
+## Resource Limits
+
+- CPU-only (free tier) or basic GPU
+- 16GB RAM typical, 2 vCPU
+- Cold start: ~30-60 seconds (Docker build + model download)
+- Ephemeral disk — no persistent storage between restarts
+- Port 7860 required
+
+## Implications
+
+- Meta Prompt Guard 2 (86M params) must fit in CPU memory (~350MB)
+- LLM Guard models download on first use — handle gracefully with fallback
+- No database — all state is in-memory per session
+- No user accounts — workshop is anonymous
+- If Space sleeps (idle timeout), next request triggers cold start
+
+## Environment Variables
+
+| Variable | Required | Set via |
+|----------|----------|---------|
+| `GROQ_API_KEY` | Yes | HF Space secret |
+
+No other secrets required. Defense tools use public models.
+
+---------------------------------------------------------------------
+
+# Error Handling
+
+## Backend
+
+- All route handlers wrapped in try/except
+- Groq API errors: return structured JSON with error type and message
+- Scanner errors (model download failure, etc.): degrade gracefully — skip that defense, don't crash
+- Never expose stack traces to the frontend in production
+
+## Frontend
+
+- Show loading spinner during API calls
+- Show user-friendly error message on failure (not raw JSON)
+- Timeout after 45 seconds with "The model is taking too long" message
+- Retry logic: none — let the user click "Run" again manually
+
+---------------------------------------------------------------------
+
 # Engineering Philosophy
 
 **Spec-Driven Development**
@@ -302,6 +429,27 @@ If uncertain about model behavior → test with Groq API first.
 - Mobile responsive: sidebar collapses below 768px
 
 Visual spec in `specs/frontend_spec.md`.
+
+## Cause / Effect / Impact Rendering
+
+The API returns structured JSON for each section. The frontend renders them as cards:
+
+- **Cause card:** neutral dark code blocks for legitimate data, red left-border blockquote for injections/attacks
+- **Effect card:** model output with canary/secrets highlighted in red inline badges
+- **Impact card:** green header for BLOCKED, red header for SUCCEEDED, consequence text below
+
+Code blocks in Cause panel: use `<pre><code>` with syntax highlighting (no library — just CSS)
+Injection callouts: red left border (`#ef4444`), red-tinted background (`rgba(239,68,68,0.06)`)
+Model output: escape all HTML before rendering — never use `innerHTML` with model text
+
+## Accessibility
+
+- All interactive elements keyboard-navigable
+- Sidebar items focusable with Enter/Space to select
+- ARIA labels on icon-only buttons
+- Color is never the ONLY indicator — use icons (✅/🚨) alongside green/red
+- Font sizes minimum 14px body, 12px captions
+- Sufficient contrast ratio (4.5:1 minimum) on all text
 
 ---------------------------------------------------------------------
 
