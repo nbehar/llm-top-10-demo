@@ -10,6 +10,18 @@
 
 ---
 
+## Postman Collection
+
+**Location:** `postman/llm-top-10-lab.postman_collection.json`
+
+The Postman collection mirrors every endpoint below. When this spec changes, the collection MUST be updated to match. Import into Postman and set `base_url` to your running instance.
+
+**Variables:**
+- `{{base_url}}` — default `http://localhost:7860`
+- `{{canary}}` — default `BANANA SUNDAE`
+
+---
+
 ## Endpoints
 
 ### `GET /`

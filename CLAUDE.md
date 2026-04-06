@@ -31,6 +31,8 @@ static/css/         Stylesheets
 static/js/          Client-side app logic and i18n
 templates/          Jinja2 HTML templates
 specs/              Feature and attack specifications
+postman/            Postman collection (API testing contract)
+docs/               Project status and session tracking
 ```
 
 ---------------------------------------------------------------------
@@ -330,8 +332,29 @@ Calls Groq API with `llama-3.3-70b-versatile`, `temperature=0.7`, `max_tokens=10
 | POST | `/api/custom` | Run custom system/context/user prompt |
 | POST | `/api/scorecard` | Run all attacks |
 | GET | `/api/scorecard/stream` | SSE endpoint for scorecard progress |
+| GET | `/health` | Health check (API key status, attack count) |
 
 Full schemas in `specs/api_spec.md`.
+
+## Postman Collection (MANDATORY)
+
+Location: `postman/llm-top-10-lab.postman_collection.json`
+
+The Postman collection is the **API testing contract**. It contains a request for every endpoint with example payloads, expected behavior descriptions, and shared variables.
+
+**Update rules:**
+
+- When a new API endpoint is added → add a corresponding Postman request
+- When request/response schema changes → update the Postman request body and description
+- When a new attack is added → add a Postman request for it in the correct OWASP folder
+- When an endpoint is removed → remove the Postman request
+- When success_check_strings change → update the Postman request description
+
+The collection uses variables:
+- `{{base_url}}` — default `http://localhost:7860`
+- `{{canary}}` — default `BANANA SUNDAE`
+
+Claude MUST keep the Postman collection in sync with `app.py` routes. A route without a Postman request is untestable. A Postman request pointing to a nonexistent route is broken.
 
 ---------------------------------------------------------------------
 
