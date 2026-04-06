@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-**Frontend live. All 10 attacks verified (10/10). Deployed to HF Spaces. Defense tools next.**
+**Frontend + defense tools live. All 10 attacks verified (10/10). 5 defense tools implemented. Deployed to HF Spaces.**
 
 ---------------------------------------------------------------------
 
@@ -40,12 +40,12 @@
 | Scorecard route (sync, SSE pending) | `app.py` | 🔧 Partial |
 | Health check (/health) | `app.py` | ✅ Done |
 | Postman collection | `postman/` | ✅ Done (16 requests) |
-| Defense route (/api/defend) | `app.py` | ⬜ Not started |
-| Meta Prompt Guard 2 integration | `scanner.py` | ⬜ Not started |
-| LLM Guard output scanner integration | `scanner.py` | ⬜ Not started |
-| LLM Guard context scanner integration | `scanner.py` | ⬜ Not started |
-| System prompt hardening logic | `scanner.py` | ⬜ Not started |
-| Guardrail model logic | `scanner.py` | ⬜ Not started |
+| Defense route (/api/defend) | `app.py` | ✅ Done |
+| Meta Prompt Guard 2 integration | `scanner.py` | ✅ Done (lazy-load, CPU) |
+| LLM Guard output scanner integration | `scanner.py` | ✅ Done (+ regex fallback) |
+| LLM Guard context scanner integration | `scanner.py` | ✅ Done (+ regex fallback) |
+| System prompt hardening logic | `scanner.py` | ✅ Done (XML tags + 5 rules) |
+| Guardrail model logic | `scanner.py` | ✅ Done (second Groq call) |
 | HTML template | `templates/index.html` | ✅ Done |
 | CSS dark theme | `static/css/styles.css` | ✅ Done |
 | JS app logic (sidebar, forms, results) | `static/js/app.js` | ✅ Done |
@@ -59,7 +59,7 @@
 
 ## Open Issues
 
-- [#1](https://github.com/nbehar/llm-top-10-demo/issues/1) — Re-add heavy ML deps (torch, transformers, llm-guard) when scanner.py is implemented
+- ~~[#1](https://github.com/nbehar/llm-top-10-demo/issues/1) — Re-add heavy ML deps~~ ✅ Closed
 
 ---------------------------------------------------------------------
 
@@ -84,17 +84,17 @@
 
 | Defense Tool | Integrated? | Tested? | Notes |
 |--------------|-------------|---------|-------|
-| Meta Prompt Guard 2 | ⬜ | — | |
-| LLM Guard — Output | ⬜ | — | |
-| LLM Guard — Context | ⬜ | — | |
-| System Prompt Hardening | ⬜ | — | |
-| Guardrail Model | ⬜ | — | |
+| Meta Prompt Guard 2 | ✅ | ⚠ | Model lazy-loads on first call. Shows "unavailable" on cold start, works on subsequent calls. |
+| LLM Guard — Output | ✅ | ✅ | Catches creds (LLM02), with regex fallback for code/actions. |
+| LLM Guard — Context | ✅ | ✅ | Catches injection patterns in RAG docs via regex. |
+| System Prompt Hardening | ✅ | ✅ | XML boundary tags + 5 refusal rules. Blocks LLM01a, LLM07. |
+| Guardrail Model | ✅ | ✅ | Second Groq call catches leaked instructions/creds/disinformation. |
 
 ---------------------------------------------------------------------
 
 ## Next Recommended Task
 
-**Implement scanner.py + `/api/defend` route** — Build the 5 defense tools (Meta Prompt Guard 2, LLM Guard output/context, prompt hardening, guardrail model). Re-add heavy deps (#1). This unlocks the Defense Lab mode in the frontend.
+**Scorecard SSE streaming** — Currently `/api/scorecard` blocks for ~60-90s. Add SSE endpoint for real-time progress updates. Then: Postman collection update for `/api/defend`, full defense effectiveness matrix verification, UI polish pass.
 
 ---------------------------------------------------------------------
 
@@ -155,3 +155,27 @@
 - **Heavy deps deferred:** torch/transformers/llm-guard commented out until scanner.py implemented
 - **LLM07 technique change:** Sentence completion failed against LLaMA 3.3 — translation request more reliable
 - **LLM02 system prompt softened:** Explicit "DO NOT SHARE" too strong — changed to "handle professionally"
+
+### Session 3 — 2026-04-06
+
+**What was accomplished:**
+
+1. Implemented `scanner.py` (380 lines) — 5 defense functions + orchestrator
+   - scan_input: Meta Prompt Guard 2 (86M DeBERTa, lazy-loaded, CPU)
+   - scan_output: LLM Guard Sensitive + BanCode + regex fallback for creds/code/actions
+   - scan_context: LLM Guard PromptInjection + regex for HTML comments, overrides, patches
+   - harden_prompt: XML boundary tags + SECURITY_POLICY with 5 refusal rules
+   - guardrail_check: Second Groq API call with evaluator prompt, JSON response parsing
+2. Added `/api/defend` route in `app.py` — runs undefended, then runs selected defenses, re-runs with hardened prompt if issues detected
+3. Updated frontend Defense Lab mode — sends selected defenses, renders per-defense verdicts with risk bars and violation lists
+4. Re-added heavy deps (torch, transformers, llm-guard) — closes #1
+5. Deployed to HF Spaces — build takes ~2min with heavy deps
+6. Tested LLM01a defend: Guardrail caught leaked instructions, hardening made model refuse → ATTACK BLOCKED
+7. Tested LLM02 defend: Output scanner caught DB creds + API keys, guardrail caught too
+
+**Key decisions:**
+
+- **Regex fallback:** scanner.py uses LLM Guard where available but falls back to regex patterns for cred/code/action detection — ensures defense works even if LLM Guard models fail to download
+- **Prompt Guard lazy-load:** Model downloads on first call to avoid slowing cold start — shows "unavailable" on very first request
+- **Guardrail JSON parsing:** Strips markdown code fences from model response before JSON.loads — LLaMA sometimes wraps JSON in backticks
+- **Defense re-run logic:** Only re-runs with hardened prompt (not sanitized output) — keeps the demo simple and educational
