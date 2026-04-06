@@ -150,7 +150,7 @@ function renderSidebar() {
       return `
         <div class="attack-item${isActive ? " attack-item--active" : ""}" data-id="${atk.id}" tabindex="0" role="button" aria-label="${escapeHtml(atk.label)}">
           <div class="attack-item__id">
-            <span>${escapeHtml(atk.owasp_id)}${atk.id.includes("b_") ? "b" : atk.id.includes("a_") ? "a" : ""}</span>
+            <span>${escapeHtml(atk.owasp_id)}${atk.id.startsWith("llm01b") ? "b" : atk.id.startsWith("llm01a") ? "a" : ""}</span>
             <span class="attack-item__status ${statusClass}">${statusIcon}</span>
           </div>
           <div class="attack-item__name">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</div>
