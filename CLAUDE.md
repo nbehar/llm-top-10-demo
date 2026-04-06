@@ -531,16 +531,47 @@ Claude MUST NOT silently work around a problem. If it's worth a workaround, it's
 
 ---------------------------------------------------------------------
 
+# Project Status Tracking (MANDATORY)
+
+Claude maintains: `docs/project-status.md`
+
+This file is Claude's cross-session memory. It MUST be updated:
+
+- **At the start of each session:** read it to pick up where the last session left off
+- **After completing a task:** mark the component as done, update verification tables
+- **After testing an attack:** record whether it worked, any tuning needed
+- **After integrating a defense tool:** record whether it detects what it should
+- **After hitting a blocker:** note the issue number and workaround (if any)
+- **At the end of a session:** update "Session Notes" with what was done and what's next
+
+The file contains:
+
+- **Spec Status:** which specs are written
+- **Implementation Status:** which components are built (⬜/🔧/✅)
+- **Open Issues:** links to GitHub issues
+- **Attack Verification:** does each attack actually work against LLaMA?
+- **Defense Verification:** does each defense tool catch what it should?
+- **Next Recommended Task:** what to do next
+- **Session Notes:** per-session log of decisions and progress
+
+If `project-status.md` doesn't exist → create it from the template.
+
+If it exists but is stale → update it before proposing work.
+
+---------------------------------------------------------------------
+
 # Default Startup Behavior
 
 On session start Claude MUST:
 
 1. Read CLAUDE.md
-2. Read all specs
-3. Check what's implemented (app.py, scanner.py, static/, templates/)
-4. Identify gaps between specs and implementation
-5. Propose next task with specific files and changes
-6. Wait for approval before coding
+2. Read `docs/project-status.md`
+3. Read all specs
+4. Check what's implemented (app.py, scanner.py, static/, templates/)
+5. Cross-reference implementation against project-status.md
+6. Update project-status.md if stale
+7. Propose next task based on "Next Recommended Task"
+8. Wait for approval before coding
 
 ---------------------------------------------------------------------
 
