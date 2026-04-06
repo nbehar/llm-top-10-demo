@@ -84,11 +84,11 @@
 
 | Defense Tool | Integrated? | Tested? | Notes |
 |--------------|-------------|---------|-------|
-| Meta Prompt Guard 2 | ✅ | ⚠ | Model lazy-loads on first call. Shows "unavailable" on cold start, works on subsequent calls. |
-| LLM Guard — Output | ✅ | ✅ | Catches creds (LLM02), with regex fallback for code/actions. |
-| LLM Guard — Context | ✅ | ✅ | Catches injection patterns in RAG docs via regex. |
-| System Prompt Hardening | ✅ | ✅ | XML boundary tags + 5 refusal rules. Blocks LLM01a, LLM07. |
-| Guardrail Model | ✅ | ✅ | Second Groq call catches leaked instructions/creds/disinformation. |
+| Meta Prompt Guard 2 | ✅ | ⏳ | Gated model — awaiting Meta license approval. Code ready (v2 86M + HF_TOKEN). |
+| LLM Guard — Output | ✅ | ✅ | 10/10 detected. Regex patterns catch creds, code, actions, business secrets. |
+| LLM Guard — Context | ✅ | ✅ | 4/10 detected (LLM01b, LLM03, LLM04, LLM08). Matches spec + bonus LLM03. |
+| System Prompt Hardening | ✅ | ✅ | 5/10 blocked (LLM01a, LLM01b, LLM02, LLM04, LLM07). Re-runs with XML tags. |
+| Guardrail Model | ✅ | ✅ | 9/10 detected (all except LLM09). Second Groq call with evaluator prompt. |
 
 ---------------------------------------------------------------------
 
