@@ -37,6 +37,13 @@ function cacheDom() {
   dom.main = $(".main");
   dom.hamburger = $(".hamburger");
   dom.langButtons = $$(".lang-toggle__btn");
+  dom.overlay = $(".sidebar-overlay");
+}
+
+function toggleSidebar(open) {
+  const isOpen = open ?? !dom.sidebar.classList.contains("sidebar--open");
+  dom.sidebar.classList.toggle("sidebar--open", isOpen);
+  dom.overlay.classList.toggle("sidebar-overlay--open", isOpen);
 }
 
 // =============================================================================
@@ -47,6 +54,14 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+function renderMd(str) {
+  // Escape first, then apply minimal markdown: **bold**, `code`
+  let out = escapeHtml(str);
+  out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  out = out.replace(/`([^`]+)`/g, '<code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-size:12px;">$1</code>');
+  return out;
 }
 
 function setLang(lang) {
@@ -176,7 +191,7 @@ function renderSidebar() {
 function selectAttack(id) {
   state.selectedAttackId = id;
   // Close mobile sidebar
-  dom.sidebar.classList.remove("sidebar--open");
+  toggleSidebar(false);
   renderSidebar();
   renderMain();
 }
@@ -327,7 +342,7 @@ function renderAttackResult(r) {
       </div>
       <div class="code-block__label">${t("label_model_response", lang)}</div>
       <div class="model-output">${modelResponse}</div>
-      <div class="card__text" style="margin-top:12px;">${escapeHtml(effect.explanation || "")}</div>
+      <div class="card__text" style="margin-top:12px;">${renderMd(effect.explanation || "")}</div>
     </div>
 
     <div class="card fade-in">
@@ -704,14 +719,11 @@ function bindEvents() {
   });
 
   // Hamburger
-  dom.hamburger.addEventListener("click", () => {
-    dom.sidebar.classList.toggle("sidebar--open");
-  });
+  dom.hamburger.addEventListener("click", () => toggleSidebar());
 
-  // Close sidebar on main click (mobile)
-  dom.main.addEventListener("click", () => {
-    dom.sidebar.classList.remove("sidebar--open");
-  });
+  // Close sidebar on overlay or main click (mobile)
+  dom.overlay.addEventListener("click", () => toggleSidebar(false));
+  dom.main.addEventListener("click", () => toggleSidebar(false));
 }
 
 // =============================================================================
