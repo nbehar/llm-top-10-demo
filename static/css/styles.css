@@ -592,9 +592,10 @@ textarea { min-height: 100px; }
 
 .defense-toggle {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -603,6 +604,16 @@ textarea { min-height: 100px; }
   font-family: var(--font);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+}
+
+.defense-toggle span {
+  font-weight: 500;
+}
+
+.defense-toggle small {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
 .defense-toggle:hover {
@@ -617,6 +628,51 @@ textarea { min-height: 100px; }
 
 .defense-toggle input {
   display: none;
+}
+
+/* -- Defense result panels ------------------------------------------------- */
+.defense-found {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-sec);
+}
+
+.defense-found__title {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+
+.defense-found--detected {
+  background: rgba(34, 197, 94, 0.06);
+  border-left: 3px solid var(--green);
+}
+
+.defense-found--detected .defense-found__title {
+  color: var(--green);
+}
+
+.defense-found--miss {
+  background: rgba(161, 161, 170, 0.06);
+  border-left: 3px solid var(--text-muted);
+}
+
+.defense-found--miss .defense-found__title {
+  color: var(--text-muted);
+}
+
+.defense-found--applied {
+  background: rgba(59, 130, 246, 0.06);
+  border-left: 3px solid var(--blue);
+}
+
+.defense-found--applied .defense-found__title {
+  color: var(--blue);
 }
 
 /* -- Custom mode ----------------------------------------------------------- */
