@@ -368,6 +368,7 @@ function buildSlides(atk) {
       icon: "\ud83d\udee1\ufe0f",
       title: "How to Prevent It",
       body: remediation,
+      html: true,
     },
   ];
 }
@@ -392,7 +393,7 @@ function renderSlideDeck(atk) {
           <span class="slide-deck__slide-counter">${idx + 1}/${total}</span>
         </div>
         <div class="slide-deck__slide-body">
-          ${renderMd(slide.body)}
+          ${slide.html ? slide.body : renderMd(slide.body)}
           ${slide.link ? `<a href="${slide.link}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--blue);text-decoration:none;">Read more on OWASP \u2192</a>` : ""}
         </div>
       </div>
