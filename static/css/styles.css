@@ -418,6 +418,110 @@ textarea { min-height: 100px; }
   margin-bottom: 12px;
 }
 
+/* -- Slide Deck ------------------------------------------------------------ */
+.slide-deck {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.slide-deck__slide {
+  padding: 20px 24px 12px;
+  min-height: 140px;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.slide-deck__slide-icon {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.slide-deck__slide-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slide-deck__slide-counter {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.slide-deck__slide-body {
+  font-size: 13px;
+  color: var(--text-sec);
+  line-height: 1.7;
+}
+
+.slide-deck__slide-body strong {
+  color: var(--text);
+}
+
+.slide-deck__slide-body code {
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+.slide-deck__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.slide-deck__btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--text-sec);
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slide-deck__btn:hover {
+  background: var(--surface-el);
+  color: var(--text);
+}
+
+.slide-deck__btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.slide-deck__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.slide-deck__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+}
+
+.slide-deck__dot--active {
+  background: var(--blue);
+}
+
 .code-block__label {
   font-family: var(--font);
   font-size: 12px;

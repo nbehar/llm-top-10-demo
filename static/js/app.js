@@ -46,6 +46,7 @@ const state = {
   scorecardProgress: { completed: 0, total: 0 },
   selectedDefenses: [],     // defense IDs selected in Defense Lab
   lastDefendResult: null,   // last /api/defend response
+  slideIndex: {},           // attack_id -> current slide index
 };
 
 // =============================================================================
@@ -315,6 +316,124 @@ function renderOwaspDesc(owaspId) {
     </div>`;
 }
 
+// -- Remediation Info (per OWASP ID) ----------------------------------------
+
+const REMEDIATION = {
+  LLM01: "Use <strong>Meta Prompt Guard 2</strong> to detect injection patterns in user input. Apply <strong>System Prompt Hardening</strong> with XML boundary tags. Use a <strong>Guardrail Model</strong> to evaluate outputs. Never put secrets in system prompts.",
+  LLM02: "Scan all outputs with <strong>LLM Guard</strong> for credentials, PII, and connection strings. Redact sensitive data before it reaches the user. Don't embed real secrets in system prompts \u2014 use references to external secret managers.",
+  LLM03: "Scan RAG documents with <strong>LLM Guard Context Scanner</strong> before injecting into context. Verify package names against known registries. Pin dependencies and audit supply chain regularly.",
+  LLM04: "Scan knowledge base documents for injection patterns. Verify document provenance and trust levels. Use <strong>Context Scanning</strong> to detect authority overrides and policy reversals in retrieved docs.",
+  LLM05: "Never render model output as raw HTML. Sanitize all output before passing to downstream systems. Use Content Security Policy headers. Scan output for XSS patterns with <strong>LLM Guard Output Scanner</strong>.",
+  LLM06: "Apply least-privilege to tool access. Require human confirmation for destructive actions (delete, drop, rm). Use a <strong>Guardrail Model</strong> to flag destructive tool calls before execution.",
+  LLM07: "Use <strong>System Prompt Hardening</strong> with explicit refusal rules for translation, encoding, and role-play extraction. Never put business-critical secrets in system prompts. Detect extraction attempts with <strong>Prompt Guard 2</strong>.",
+  LLM08: "Scan all RAG documents with <strong>Context Scanner</strong> before injection. Tag documents with trust levels. Separate trusted internal docs from user-submitted content. Verify document provenance.",
+  LLM09: "Use retrieval-augmented generation (RAG) to ground responses in verified sources. Add citations to model output. Use a <strong>Guardrail Model</strong> to check for fabricated entities. Never trust model output for critical decisions without verification.",
+  MCP01: "Never expose raw tool responses containing credentials to the model. Redact secrets at the MCP server level. Use output scanning to catch leaked credentials before they reach the user.",
+  MCP03: "Validate tool metadata against a trusted registry. Don't trust self-reported tool capabilities. Sign tool responses and verify integrity.",
+  MCP05: "Never present raw tool output as executable commands. Sanitize command strings. Use allowlists for permitted remediation actions.",
+  MCP06: "Treat all MCP tool responses as untrusted data. Scan for injection patterns (admin overrides, HTML comments, authority spoofing). Apply the same defenses as RAG context scanning.",
+  MCP10: "Implement tenant isolation in shared AI memory. Never load another user's session data. Encrypt memory entries and scope access by user identity.",
+  ASI01: "Validate agent goals against the original task description. Detect goal drift by comparing planned actions to the user's request. Require human approval for tool calls that don't match the original task.",
+  ASI02: "Implement least-privilege tool access. Block dangerous tool chains (read-creds \u2192 query-data \u2192 post-externally). Require human approval for multi-step operations that cross security boundaries.",
+  ASI03: "Never run agents under shared admin service accounts. Implement per-user authorization checks. Verify the requester has permission for each specific action, not just authenticated access.",
+  ASI05: "Sandbox all code execution environments. Sanitize data before including in generated code. Block dangerous imports (os, subprocess, eval). Scan uploaded files for embedded payloads.",
+  ASI06: "Validate memory entries against a trust model. Don't allow users to write arbitrary agent notes. Expire memory entries and require re-verification. Audit memory for privilege escalation patterns.",
+  ASI09: "Scan knowledge base for phishing URLs and credential harvesting patterns. Verify URLs against domain allowlists. Never instruct users to submit credentials to external URLs.",
+};
+
+// -- Slide Deck Component ---------------------------------------------------
+
+function buildSlides(atk) {
+  const owaspInfo = OWASP_INFO[atk.owasp_id];
+  const remediation = REMEDIATION[atk.owasp_id] || "Apply defense-in-depth: input scanning, output scanning, and prompt hardening.";
+
+  return [
+    {
+      icon: "\ud83d\udcd6",
+      title: `What is ${escapeHtml(atk.owasp_name)}?`,
+      body: owaspInfo ? owaspInfo.desc : atk.description,
+      link: owaspInfo ? owaspInfo.url : null,
+    },
+    {
+      icon: "\u2699\ufe0f",
+      title: "How This Attack Works",
+      body: atk.what_this_shows || atk.description,
+    },
+    {
+      icon: "\ud83d\udca5",
+      title: "Real-World Impact",
+      body: atk.impact || "If this attack succeeds in production, an attacker gains unauthorized access to data, systems, or functionality.",
+    },
+    {
+      icon: "\ud83d\udee1\ufe0f",
+      title: "How to Prevent It",
+      body: remediation,
+    },
+  ];
+}
+
+function renderSlideDeck(atk) {
+  if (!atk) return "";
+  const slides = buildSlides(atk);
+  const idx = state.slideIndex[atk.id] || 0;
+  const slide = slides[idx];
+  const total = slides.length;
+
+  const dots = slides.map((_, i) =>
+    `<button class="slide-deck__dot${i === idx ? " slide-deck__dot--active" : ""}" data-slide="${i}" aria-label="Slide ${i + 1}"></button>`
+  ).join("");
+
+  return `
+    <div class="slide-deck" data-attack-id="${atk.id}">
+      <div class="slide-deck__slide">
+        <div class="slide-deck__slide-icon">${slide.icon}</div>
+        <div class="slide-deck__slide-title">
+          ${escapeHtml(slide.title)}
+          <span class="slide-deck__slide-counter">${idx + 1}/${total}</span>
+        </div>
+        <div class="slide-deck__slide-body">
+          ${renderMd(slide.body)}
+          ${slide.link ? `<a href="${slide.link}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--blue);text-decoration:none;">Read more on OWASP \u2192</a>` : ""}
+        </div>
+      </div>
+      <div class="slide-deck__nav">
+        <button class="slide-deck__btn" data-dir="prev" ${idx === 0 ? "disabled" : ""}>\u25c0 Prev</button>
+        <div class="slide-deck__dots">${dots}</div>
+        <button class="slide-deck__btn" data-dir="next" ${idx === total - 1 ? "disabled" : ""}>Next \u25b6</button>
+      </div>
+    </div>`;
+}
+
+function bindSlideDeck() {
+  const deck = $(".slide-deck");
+  if (!deck) return;
+  const attackId = deck.dataset.attackId;
+
+  // Nav buttons
+  $$(".slide-deck__btn", deck).forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = state.slideIndex[attackId] || 0;
+      const slides = buildSlides(state.attacks.find((a) => a.id === attackId));
+      if (btn.dataset.dir === "prev" && idx > 0) state.slideIndex[attackId] = idx - 1;
+      if (btn.dataset.dir === "next" && idx < slides.length - 1) state.slideIndex[attackId] = idx + 1;
+      // Re-render just the slide deck
+      const newDeck = renderSlideDeck(state.attacks.find((a) => a.id === attackId));
+      deck.outerHTML = newDeck;
+      bindSlideDeck();
+    });
+  });
+
+  // Dot navigation
+  $$(".slide-deck__dot", deck).forEach((dot) => {
+    dot.addEventListener("click", () => {
+      state.slideIndex[attackId] = parseInt(dot.dataset.slide);
+      const newDeck = renderSlideDeck(state.attacks.find((a) => a.id === attackId));
+      deck.outerHTML = newDeck;
+      bindSlideDeck();
+    });
+  });
+}
+
 // -- Attack Mode -----------------------------------------------------------
 
 function renderAttackMode() {
@@ -340,12 +459,12 @@ function renderAttackMode() {
 
   dom.main.innerHTML = `
     ${renderAttackDropdown()}
+    ${renderSlideDeck(atk)}
     <div class="attack-header fade-in">
       <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)} \u00b7 ${escapeHtml(atk.owasp_name)}</div>
       <h1 class="attack-header__title">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>
       <p class="attack-header__desc">${escapeHtml(atk.description)}</p>
-      ${renderOwaspDesc(atk.owasp_id)}
-      <div style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text-sec);">
+      <div style="margin-top:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text-sec);">
         <strong style="color:var(--purple);">Detection method:</strong> ${escapeHtml(detectionDescs[atk.success_criteria] || atk.success_criteria)}
       </div>
     </div>
@@ -367,8 +486,9 @@ function renderAttackMode() {
       ${result ? renderAttackResult(result) : ""}
     </div>`;
 
-  // Bind dropdown + run button
+  // Bind dropdown + slide deck + run button
   bindAttackDropdown();
+  bindSlideDeck();
   const btnRun = $("#btn-run");
   btnRun.addEventListener("click", () => handleRunAttack(atk));
 }
@@ -520,11 +640,11 @@ function renderDefendMode() {
 
   dom.main.innerHTML = `
     ${renderAttackDropdown()}
+    ${renderSlideDeck(atk)}
     <div class="attack-header fade-in">
       <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)} \u00b7 ${escapeHtml(atk.owasp_name)}</div>
       <h1 class="attack-header__title">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>
       <p class="attack-header__desc">${escapeHtml(atk.description)}</p>
-      ${renderOwaspDesc(atk.owasp_id)}
     </div>
     <div class="form-group">
       <label>${t("label_select_defenses", lang)}</label>
@@ -555,8 +675,9 @@ function renderDefendMode() {
       <div id="defend-results"></div>
     </div>`;
 
-  // Bind dropdown + defense toggles
+  // Bind dropdown + slide deck + defense toggles
   bindAttackDropdown();
+  bindSlideDeck();
   $$(".defense-toggle").forEach((label) => {
     const cb = $("input", label);
     cb.addEventListener("change", () => {

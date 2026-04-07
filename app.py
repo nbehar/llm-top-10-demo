@@ -481,6 +481,8 @@ def _build_choices(attacks_dict: dict) -> list[dict]:
             "default_user_prompt": atk["default_user_prompt"],
             "has_canary": atk["success_criteria"] == "canary",
             "success_criteria": atk["success_criteria"],
+            "what_this_shows": atk.get("what_this_shows", ""),
+            "impact": atk.get("impact", ""),
         }
         for key, atk in attacks_dict.items()
     ]
