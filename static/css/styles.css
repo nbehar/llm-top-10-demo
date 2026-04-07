@@ -666,50 +666,83 @@ textarea { min-height: 100px; }
 
 /* -- Defense panels -------------------------------------------------------- */
 .defense-toggles {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .defense-toggle {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
-  padding: 10px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 2px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-sec);
   font-size: 12px;
   font-family: var(--font);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .defense-toggle span {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 13px;
+  display: block;
 }
 
 .defense-toggle small {
   font-size: 11px;
   color: var(--text-muted);
   font-weight: 400;
+  line-height: 1.4;
+  display: block;
 }
 
 .defense-toggle:hover {
-  background: var(--surface-el);
+  background: var(--surface);
+  border-color: var(--border-active);
 }
 
 .defense-toggle--active {
   border-color: var(--green);
   color: var(--green);
-  background: rgba(34, 197, 94, 0.06);
+  background: rgba(34, 197, 94, 0.08);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.2);
+}
+
+.defense-toggle--active small {
+  color: var(--text-sec);
 }
 
 .defense-toggle input {
   display: none;
+}
+
+.defense-presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.defense-presets__btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.defense-presets__btn:hover {
+  background: var(--surface-el);
+  color: var(--text);
 }
 
 /* -- Defense result panels ------------------------------------------------- */

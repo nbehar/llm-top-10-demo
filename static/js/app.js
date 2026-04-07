@@ -766,13 +766,18 @@ function renderDefendMode() {
     </div>
     <div class="form-group">
       <label>${t("label_select_defenses", lang)}</label>
+      <div class="defense-presets">
+        <button class="defense-presets__btn" data-preset="none">${lang === "es" ? "Ninguno" : "None"}</button>
+        <button class="defense-presets__btn" data-preset="basic">${lang === "es" ? "B\u00e1sico" : "Basic"}</button>
+        <button class="defense-presets__btn" data-preset="all">${lang === "es" ? "Todos" : "All"}</button>
+      </div>
       <div class="defense-toggles">
         ${[
-          ["prompt_guard", "\ud83d\udee1", t("defense_prompt_guard", lang), "Scans user prompt for injection patterns"],
-          ["output_scan", "\ud83d\udcca", t("defense_output_scan", lang), "Scans model response for leaked secrets &amp; dangerous code"],
-          ["context_scan", "\ud83d\udcc4", t("defense_context_scan", lang), "Scans RAG documents for hidden instructions"],
-          ["hardening", "\ud83d\udd12", t("defense_hardening", lang), "Wraps system prompt with boundary tags &amp; refusal rules"],
-          ["guardrail", "\ud83e\udd16", t("defense_guardrail", lang), "Second LLM evaluates response for policy violations"],
+          ["prompt_guard", "\ud83d\udee1", t("defense_prompt_guard", lang), lang === "es" ? "Escanea el prompt del usuario buscando patrones de inyecci\u00f3n" : "Scans user prompt for injection patterns"],
+          ["output_scan", "\ud83d\udcca", t("defense_output_scan", lang), lang === "es" ? "Escanea la respuesta del modelo buscando secretos filtrados" : "Scans model response for leaked secrets &amp; dangerous code"],
+          ["context_scan", "\ud83d\udcc4", t("defense_context_scan", lang), lang === "es" ? "Escanea documentos RAG buscando instrucciones ocultas" : "Scans RAG documents for hidden instructions"],
+          ["hardening", "\ud83d\udd12", t("defense_hardening", lang), lang === "es" ? "Envuelve el prompt del sistema con etiquetas XML y reglas de rechazo" : "Wraps system prompt with boundary tags &amp; refusal rules"],
+          ["guardrail", "\ud83e\udd16", t("defense_guardrail", lang), lang === "es" ? "Un segundo LLM eval\u00faa la respuesta buscando violaciones" : "Second LLM evaluates response for policy violations"],
         ].map(([id, icon, name, desc]) => `<label class="defense-toggle${state.selectedDefenses.includes(id) ? " defense-toggle--active" : ""}"><input type="checkbox" value="${id}" ${state.selectedDefenses.includes(id) ? "checked" : ""} /><span>${icon} ${name}</span><small>${desc}</small></label>`).join("")}
       </div>
     </div>
@@ -793,7 +798,7 @@ function renderDefendMode() {
       <div id="defend-results"></div>
     </div>`;
 
-  // Bind dropdown + slide deck + defense toggles
+  // Bind dropdown + slide deck + defense toggles + presets
   bindAttackDropdown();
   bindSlideDeck();
   $$(".defense-toggle").forEach((label) => {
@@ -801,6 +806,20 @@ function renderDefendMode() {
     cb.addEventListener("change", () => {
       label.classList.toggle("defense-toggle--active", cb.checked);
       state.selectedDefenses = [...$$(".defense-toggle input:checked")].map((c) => c.value);
+    });
+  });
+
+  // Preset buttons
+  const presets = { none: [], basic: ["prompt_guard", "output_scan"], all: ["prompt_guard", "output_scan", "context_scan", "hardening", "guardrail"] };
+  $$(".defense-presets__btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const ids = presets[btn.dataset.preset] || [];
+      state.selectedDefenses = ids;
+      $$(".defense-toggle").forEach((label) => {
+        const cb = $("input", label);
+        cb.checked = ids.includes(cb.value);
+        label.classList.toggle("defense-toggle--active", cb.checked);
+      });
     });
   });
 
