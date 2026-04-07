@@ -13,16 +13,15 @@
 <body>
   <div class="layout">
 
-    <!-- Header -->
-    <header class="header">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" aria-label="Toggle menu">&#9776;</button>
-        <div class="header__title">
-          <span class="header__title-text">LLM Top 10 Security Lab</span>
-          <span>OWASP</span>
-        </div>
-      </div>
-      <div class="header__right">
+    <!-- Hero header -->
+    <header class="hero">
+      <div class="hero__inner">
+        <h1 class="hero__title">LLM Top 10 Security Lab <span class="hero__sub">NexaCore Technologies</span></h1>
+        <h5 class="hero__org">OWASP &middot; Interactive Security Workshop</h5>
+        <p class="hero__desc">
+          Run <strong>9 real attacks</strong> against a live LLM (LLaMA 3.3 70B). Toggle <strong>5 defense tools</strong> to see what catches each attack. Write your own injection payloads.
+          <span class="hero__canary">Canary: <code>BANANA SUNDAE</code></span> &middot; <span class="hero__note">For educational purposes only</span>
+        </p>
         <div class="lang-toggle">
           <button class="lang-toggle__btn lang-toggle__btn--active" data-lang="en">EN</button>
           <button class="lang-toggle__btn" data-lang="es">ES</button>
@@ -30,35 +29,16 @@
       </div>
     </header>
 
-    <!-- Body -->
-    <div class="body">
+    <!-- Tabs -->
+    <nav class="tabs" role="tablist">
+      <button class="tab tab--active" data-mode="attack" role="tab" aria-selected="true">Attack</button>
+      <button class="tab" data-mode="defend" role="tab">Defense</button>
+      <button class="tab" data-mode="custom" role="tab">Custom Prompt</button>
+      <button class="tab" data-mode="scorecard" role="tab">Scorecard</button>
+    </nav>
 
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="sidebar__attacks"></div>
-        <div class="sidebar__modes">
-          <button class="mode-btn mode-btn--active" data-mode="attack">
-            <span class="mode-btn__icon">&#9876;&#65039;</span> Attack Lab
-          </button>
-          <button class="mode-btn" data-mode="defend">
-            <span class="mode-btn__icon">&#128737;&#65039;</span> Defense Lab
-          </button>
-          <button class="mode-btn" data-mode="custom">
-            <span class="mode-btn__icon">&#9998;&#65039;</span> Custom Prompt
-          </button>
-          <button class="mode-btn" data-mode="scorecard">
-            <span class="mode-btn__icon">&#128202;</span> Scorecard
-          </button>
-        </div>
-      </aside>
-
-      <!-- Mobile overlay -->
-      <div class="sidebar-overlay"></div>
-
-      <!-- Main -->
-      <main class="main"></main>
-
-    </div>
+    <!-- Main content -->
+    <main class="main"></main>
 
     <!-- Footer -->
     <footer class="footer">

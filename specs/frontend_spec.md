@@ -49,86 +49,74 @@ Border radius:     8px (cards), 6px (inputs), 4px (badges)
 
 ## Page Layout
 
-Single-page app. No routing — all state managed client-side.
+Single-page app. No routing — all state managed client-side. Vertical flow with tabs + dropdown (matches MCP workshop layout). No sidebar.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Header bar (fixed)                                  EN/ES  │
-├──────────┬──────────────────────────────────────────────────┤
-│          │                                                  │
-│ Sidebar  │  Main Panel                                      │
-│ (260px)  │  (flex-1)                                        │
-│          │                                                  │
-│ ┌──────┐ │  ┌──────────────────────────────────────────┐    │
-│ │Attack│ │  │ Attack form                              │    │
-│ │ List │ │  │ (query input, canary, Run button)        │    │
-│ │      │ │  └──────────────────────────────────────────┘    │
-│ │ LLM01│ │                                                  │
-│ │ LLM02│ │  ┌──────────────────────────────────────────┐    │
-│ │ LLM03│ │  │ ① The Cause                              │    │
-│ │ ...  │ │  └──────────────────────────────────────────┘    │
-│ │ LLM09│ │  ┌──────────────────────────────────────────┐    │
-│ ├──────┤ │  │ ② The Effect                             │    │
-│ │Modes:│ │  └──────────────────────────────────────────┘    │
-│ │Attack│ │  ┌──────────────────────────────────────────┐    │
-│ │Defend│ │  │ ③ The Impact                             │    │
-│ │Custom│ │  └──────────────────────────────────────────┘    │
-│ │Score │ │                                                  │
-│ └──────┘ │  ┌──────────────────────────────────────────┐    │
-│          │  │ ▶ Full Prompt (collapsible)               │    │
-│          │  └──────────────────────────────────────────┘    │
-│          │                                                  │
-├──────────┴──────────────────────────────────────────────────┤
+│  Hero Header                                         EN/ES  │
+│  LLM Top 10 Security Lab — NexaCore Technologies            │
+│  OWASP · Interactive Security Workshop                       │
+│  Run 9 real attacks... Toggle 5 defense tools...             │
+├─────────────────────────────────────────────────────────────┤
+│  [Attack] [Defense] [Custom Prompt] [Scorecard]   ← tabs    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  [Select an attack ▼]                         ← dropdown    │
+│                                                              │
+│  LLM01 · PROMPT INJECTION                                    │
+│  Direct Prompt Injection                                     │
+│  OWASP description + link                                    │
+│  Detection method badge                                      │
+│                                                              │
+│  User prompt: [textarea]                                     │
+│  Canary: [input]                                             │
+│  [▶ Run Attack]                                              │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ ① The Cause                                          │    │
+│  └──────────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ ② The Effect                                         │    │
+│  └──────────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ ③ The Impact                                         │    │
+│  └──────────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ ▶ Full Prompt (collapsible)                           │    │
+│  └──────────────────────────────────────────────────────┘    │
+│                                                              │
+├─────────────────────────────────────────────────────────────┤
 │  Footer (attribution, links)                                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Header Bar
+## Hero Header
 
-- **Left:** App title — "LLM Top 10 Security Lab" (or localized)
-- **Center:** OWASP badge/reference (small, muted)
-- **Right:** Language toggle (🇺🇸 / 🇲🇽 radio buttons, same as MCP demo)
-
-Height: 48px. Background: `#141416`. Bottom border: `#27272a`.
+Full-width header with app context. Background: `#141416`. Contains:
+- **Title:** "LLM Top 10 Security Lab — NexaCore Technologies"
+- **Subtitle:** "OWASP · Interactive Security Workshop"
+- **Description:** Brief context (9 attacks, 5 defenses, canary phrase)
+- **Language toggle:** EN/ES buttons (top-right, absolute positioned)
 
 ---
 
-## Sidebar (260px, fixed)
+## Tabs
 
-### Top Section: Attack List
-Scrollable list of all 9 attacks (11 sub-scenarios). Each item:
+Horizontal tab bar below the hero. Four tabs:
+- **Attack** — Run attacks, see Cause/Effect/Impact
+- **Defense** — Same attacks with defense tools enabled
+- **Custom Prompt** — User writes own prompts
+- **Scorecard** — Run all attacks at once
 
-```
-┌────────────────────────────┐
-│ LLM01a                     │  ← OWASP ID (muted)
-│ Direct Prompt Injection    │  ← Attack name (primary text)
-│ ● Prompt Injection         │  ← Category badge (purple)
-│                      ✓/✗/– │  ← Status indicator
-└────────────────────────────┘
-```
+Active tab: blue text + blue bottom border.
 
-**Status indicators:**
-- `–` (gray) — not yet run
-- `✓` (green) — attack blocked
-- `✗` (red) — attack succeeded
+---
 
-Clicking an item loads that attack in the main panel.
+## Attack Dropdown
 
-**Active item:** `#1c1c1f` background, left border `#3b82f6` (blue accent).
-
-### Bottom Section: Mode Selector
-Four mode buttons stacked vertically:
-
-```
-┌────────────────────────────┐
-│  ⚔ Attack Lab              │  ← Active (blue left border)
-│  🛡 Defense Lab             │
-│  ✏ Custom Prompt           │
-│  📊 Scorecard              │
-└────────────────────────────┘
-```
+In Attack and Defense modes, a `<select>` dropdown replaces the sidebar attack list. Shows all 10 attacks with OWASP ID prefix. Changing the dropdown re-renders the main panel.
 
 Modes change the main panel behavior:
 - **Attack:** Run attacks, see Cause/Effect/Impact

@@ -33,19 +33,9 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const dom = {};
 
 function cacheDom() {
-  dom.sidebar = $(".sidebar");
-  dom.attackList = $(".sidebar__attacks");
-  dom.modeButtons = $$(".mode-btn");
+  dom.tabs = $$(".tab");
   dom.main = $(".main");
-  dom.hamburger = $(".hamburger");
   dom.langButtons = $$(".lang-toggle__btn");
-  dom.overlay = $(".sidebar-overlay");
-}
-
-function toggleSidebar(open) {
-  const isOpen = open ?? !dom.sidebar.classList.contains("sidebar--open");
-  dom.sidebar.classList.toggle("sidebar--open", isOpen);
-  dom.overlay.classList.toggle("sidebar-overlay--open", isOpen);
 }
 
 // =============================================================================
@@ -72,8 +62,8 @@ function setLang(lang) {
   dom.langButtons.forEach((btn) => {
     btn.classList.toggle("lang-toggle__btn--active", btn.dataset.lang === lang);
   });
-  $(".header__title-text").textContent = t("app_title", lang);
-  renderSidebar();
+  const titleEl = $(".hero__title");
+  if (titleEl) titleEl.childNodes[0].textContent = t("app_title", lang) + " ";
   renderMain();
 }
 
@@ -142,60 +132,39 @@ async function runScorecard(canary) {
 }
 
 // =============================================================================
-// SIDEBAR RENDERING
+// ATTACK DROPDOWN
 // =============================================================================
 
-function renderSidebar() {
-  const lang = state.lang;
-
-  // Attack list
-  dom.attackList.innerHTML = state.attacks
-    .map((atk) => {
-      const isActive = atk.id === state.selectedAttackId;
-      const result = state.attackResults[atk.id];
-      let statusIcon = "\u2013";
-      let statusClass = "attack-item__status--pending";
-      if (result) {
-        if (result.success) {
-          statusIcon = "\u2717";
-          statusClass = "attack-item__status--fail";
-        } else {
-          statusIcon = "\u2713";
-          statusClass = "attack-item__status--success";
-        }
-      }
-      return `
-        <div class="attack-item${isActive ? " attack-item--active" : ""}" data-id="${atk.id}" tabindex="0" role="button" aria-label="${escapeHtml(atk.label)}">
-          <div class="attack-item__id">
-            <span>${escapeHtml(atk.owasp_id)}${atk.id.startsWith("llm01b") ? "b" : atk.id.startsWith("llm01a") ? "a" : ""}</span>
-            <span class="attack-item__status ${statusClass}">${statusIcon}</span>
-          </div>
-          <div class="attack-item__name">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</div>
-          <div class="attack-item__badge">${escapeHtml(atk.owasp_name)}</div>
-        </div>`;
-    })
+function renderAttackDropdown() {
+  const options = state.attacks
+    .map((atk) => `<option value="${atk.id}" ${atk.id === state.selectedAttackId ? "selected" : ""}>${escapeHtml(atk.owasp_id)}${atk.id.startsWith("llm01b") ? "b" : atk.id.startsWith("llm01a") ? "a" : ""} \u2014 ${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</option>`)
     .join("");
+  return `
+    <div class="form-group">
+      <label>${t("label_select_attack", state.lang) || "Select an attack"}</label>
+      <select class="attack-select" id="attack-select">
+        ${options}
+      </select>
+    </div>`;
+}
 
-  // Attack item click handlers
-  dom.attackList.querySelectorAll(".attack-item").forEach((el) => {
-    el.addEventListener("click", () => selectAttack(el.dataset.id));
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectAttack(el.dataset.id); }
+function bindAttackDropdown() {
+  const sel = $("#attack-select");
+  if (sel) {
+    sel.addEventListener("change", () => {
+      state.selectedAttackId = sel.value;
+      renderMain();
     });
-  });
-
-  // Mode buttons
-  dom.modeButtons.forEach((btn) => {
-    btn.classList.toggle("mode-btn--active", btn.dataset.mode === state.mode);
-  });
+  }
 }
 
 function selectAttack(id) {
   state.selectedAttackId = id;
-  // Close mobile sidebar
-  toggleSidebar(false);
-  renderSidebar();
   renderMain();
+}
+
+function updateTabs() {
+  dom.tabs.forEach((t) => t.classList.toggle("tab--active", t.dataset.mode === state.mode));
 }
 
 // =============================================================================
@@ -267,17 +236,12 @@ function renderOwaspDesc(owaspId) {
 
 function renderAttackMode() {
   const lang = state.lang;
-  const atk = state.attacks.find((a) => a.id === state.selectedAttackId);
-
-  if (!atk) {
-    dom.main.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state__icon">\u2694\ufe0f</div>
-        <div class="empty-state__text">${t("empty_title", lang)}</div>
-        <div class="empty-state__sub">${t("empty_sub", lang)}</div>
-      </div>`;
-    return;
+  // Auto-select first attack if none selected
+  if (!state.selectedAttackId && state.attacks.length > 0) {
+    state.selectedAttackId = state.attacks[0].id;
   }
+  const atk = state.attacks.find((a) => a.id === state.selectedAttackId);
+  if (!atk) return;
 
   const result = state.attackResults[atk.id];
   const canaryVisible = atk.has_canary;
@@ -292,6 +256,7 @@ function renderAttackMode() {
   };
 
   dom.main.innerHTML = `
+    ${renderAttackDropdown()}
     <div class="attack-header fade-in">
       <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)} \u00b7 ${escapeHtml(atk.owasp_name)}</div>
       <h1 class="attack-header__title">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>
@@ -319,7 +284,8 @@ function renderAttackMode() {
       ${result ? renderAttackResult(result) : ""}
     </div>`;
 
-  // Bind run button
+  // Bind dropdown + run button
+  bindAttackDropdown();
   const btnRun = $("#btn-run");
   btnRun.addEventListener("click", () => handleRunAttack(atk));
 }
@@ -451,7 +417,7 @@ async function handleRunAttack(atk) {
     alert(err.message || t("error_generic", state.lang));
   } finally {
     state.running = false;
-    renderSidebar();
+    // sidebar removed — tabs + dropdown layout
     renderMain();
     bindCollapsibles();
   }
@@ -461,19 +427,14 @@ async function handleRunAttack(atk) {
 
 function renderDefendMode() {
   const lang = state.lang;
-  const atk = state.attacks.find((a) => a.id === state.selectedAttackId);
-
-  if (!atk) {
-    dom.main.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state__icon">\ud83d\udee1\ufe0f</div>
-        <div class="empty-state__text">${t("empty_title", lang)}</div>
-        <div class="empty-state__sub">${t("empty_sub", lang)}</div>
-      </div>`;
-    return;
+  if (!state.selectedAttackId && state.attacks.length > 0) {
+    state.selectedAttackId = state.attacks[0].id;
   }
+  const atk = state.attacks.find((a) => a.id === state.selectedAttackId);
+  if (!atk) return;
 
   dom.main.innerHTML = `
+    ${renderAttackDropdown()}
     <div class="attack-header fade-in">
       <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)} \u00b7 ${escapeHtml(atk.owasp_name)}</div>
       <h1 class="attack-header__title">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>
@@ -509,7 +470,8 @@ function renderDefendMode() {
       <div id="defend-results"></div>
     </div>`;
 
-  // Toggle active class on defense labels + persist to state
+  // Bind dropdown + defense toggles
+  bindAttackDropdown();
   $$(".defense-toggle").forEach((label) => {
     const cb = $("input", label);
     cb.addEventListener("change", () => {
@@ -1033,7 +995,7 @@ async function handleRunScorecard() {
   } finally {
     state.scorecardRunning = false;
     state.scorecardProgress = { completed: 0, total: 0 };
-    renderSidebar();
+    // sidebar removed — tabs + dropdown layout
     renderScorecardMode();
   }
 }
@@ -1057,11 +1019,11 @@ function bindCollapsibles() {
 // =============================================================================
 
 function bindEvents() {
-  // Mode buttons
-  dom.modeButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      state.mode = btn.dataset.mode;
-      renderSidebar();
+  // Tabs
+  dom.tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      state.mode = tab.dataset.mode;
+      updateTabs();
       renderMain();
     });
   });
@@ -1070,13 +1032,6 @@ function bindEvents() {
   dom.langButtons.forEach((btn) => {
     btn.addEventListener("click", () => setLang(btn.dataset.lang));
   });
-
-  // Hamburger
-  dom.hamburger.addEventListener("click", () => toggleSidebar());
-
-  // Close sidebar on overlay or main click (mobile)
-  dom.overlay.addEventListener("click", () => toggleSidebar(false));
-  dom.main.addEventListener("click", () => toggleSidebar(false));
 }
 
 // =============================================================================
@@ -1087,7 +1042,7 @@ async function init() {
   cacheDom();
   bindEvents();
   await loadAttacks();
-  renderSidebar();
+  if (state.attacks.length > 0) state.selectedAttackId = state.attacks[0].id;
   renderMain();
 }
 

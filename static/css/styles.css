@@ -1,6 +1,6 @@
 /* =============================================================================
    LLM Top 10 Security Lab — Styles
-   Dark theme, Linear/Vercel-inspired
+   Dark theme, tabs + dropdown layout (matches MCP workshop)
    ============================================================================= */
 
 /* -- Tokens ---------------------------------------------------------------- */
@@ -28,8 +28,7 @@
   --radius-sm:      6px;
   --radius-xs:      4px;
 
-  --sidebar-w:      260px;
-  --header-h:       48px;
+  --max-w:          900px;
 }
 
 /* -- Reset ----------------------------------------------------------------- */
@@ -49,51 +48,67 @@ html, body {
 .layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
-/* -- Header ---------------------------------------------------------------- */
-.header {
-  height: var(--header-h);
-  min-height: var(--header-h);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+/* -- Hero Header ----------------------------------------------------------- */
+.hero {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  z-index: 100;
+  padding: 24px 24px 20px;
 }
 
-.header__title {
-  font-size: 15px;
-  font-weight: 600;
+.hero__inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  position: relative;
+}
+
+.hero__title {
+  font-size: 22px;
+  font-weight: 700;
   color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  margin-bottom: 2px;
 }
 
-.header__title span {
+.hero__sub {
   color: var(--text-muted);
   font-weight: 400;
+  font-size: 14px;
+}
+
+.hero__org {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.hero__desc {
+  font-size: 13px;
+  color: var(--text-sec);
+  line-height: 1.6;
+}
+
+.hero__canary code {
+  background: var(--bg);
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  font-family: var(--mono);
   font-size: 12px;
 }
 
-.header__right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.hero__note {
+  color: var(--text-muted);
+  font-style: italic;
 }
 
-.hamburger {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--text);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
+.hero .lang-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 /* -- Language Toggle ------------------------------------------------------- */
@@ -113,6 +128,7 @@ html, body {
   padding: 4px 10px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
+  font-family: var(--font);
 }
 
 .lang-toggle__btn--active {
@@ -120,125 +136,76 @@ html, body {
   color: var(--text);
 }
 
-/* -- Body (sidebar + main) ------------------------------------------------ */
-.body {
+/* -- Tabs ------------------------------------------------------------------ */
+.tabs {
   display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* -- Sidebar --------------------------------------------------------------- */
-.sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
+  gap: 0;
   background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.sidebar__attacks {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.sidebar__modes {
-  border-top: 1px solid var(--border);
-  padding: 8px;
-}
-
-/* -- Attack items ---------------------------------------------------------- */
-.attack-item {
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background 0.15s;
-  border-left: 3px solid transparent;
-  margin-bottom: 2px;
-}
-
-.attack-item:hover {
-  background: var(--surface-el);
-}
-
-.attack-item--active {
-  background: var(--surface-el);
-  border-left-color: var(--blue);
-}
-
-.attack-item__id {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.attack-item__name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  margin-top: 2px;
-}
-
-.attack-item__badge {
-  font-size: 10px;
-  color: var(--purple);
-  margin-top: 2px;
-}
-
-.attack-item__status {
-  font-size: 12px;
-}
-
-.attack-item__status--pending { color: var(--text-muted); }
-.attack-item__status--success { color: var(--green); }
-.attack-item__status--fail    { color: var(--red); }
-
-/* -- Mode buttons ---------------------------------------------------------- */
-.mode-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  max-width: calc(var(--max-w) + 48px);
+  margin: 0 auto;
   width: 100%;
-  padding: 10px 12px;
+}
+
+.tab {
   background: none;
   border: none;
-  border-left: 3px solid transparent;
-  border-radius: var(--radius-sm);
-  color: var(--text-sec);
-  font-size: 13px;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
   font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 20px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
 
-.mode-btn:hover {
-  background: var(--surface-el);
+.tab:hover {
   color: var(--text);
 }
 
-.mode-btn--active {
-  background: var(--surface-el);
-  border-left-color: var(--blue);
-  color: var(--text);
-}
-
-.mode-btn__icon {
-  font-size: 15px;
-  width: 20px;
-  text-align: center;
+.tab--active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
 }
 
 /* -- Main Panel ------------------------------------------------------------ */
 .main {
   flex: 1;
-  overflow-y: auto;
   padding: 24px;
+  max-width: calc(var(--max-w) + 48px);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* -- Attack Dropdown ------------------------------------------------------- */
+.attack-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2371717a'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: border-color 0.15s;
+}
+
+.attack-select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+.attack-select option {
+  background: var(--surface);
+  color: var(--text);
 }
 
 /* -- Attack Header --------------------------------------------------------- */
@@ -528,34 +495,6 @@ textarea { min-height: 100px; }
   100% { background-position: -200% 0; }
 }
 
-/* -- Scorecard ------------------------------------------------------------- */
-.scorecard-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.scorecard-table th {
-  text-align: left;
-  padding: 10px 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--border);
-}
-
-.scorecard-table td {
-  padding: 10px 12px;
-  color: var(--text-sec);
-  border-bottom: 1px solid var(--border);
-}
-
-.scorecard-table tr:last-child td {
-  border-bottom: none;
-}
-
 /* -- Progress bar ---------------------------------------------------------- */
 .progress {
   width: 100%;
@@ -690,33 +629,6 @@ textarea { min-height: 100px; }
   min-height: 80px;
 }
 
-/* -- Empty state ----------------------------------------------------------- */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 300px;
-  color: var(--text-muted);
-  text-align: center;
-  gap: 12px;
-}
-
-.empty-state__icon {
-  font-size: 40px;
-  opacity: 0.5;
-}
-
-.empty-state__text {
-  font-size: 15px;
-}
-
-.empty-state__sub {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
 /* -- Footer ---------------------------------------------------------------- */
 .footer {
   padding: 12px 20px;
@@ -746,42 +658,30 @@ textarea { min-height: 100px; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* -- Mobile overlay -------------------------------------------------------- */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  top: var(--header-h);
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 80;
-}
-
-.sidebar-overlay--open {
-  display: block;
-}
-
 /* -- Mobile ---------------------------------------------------------------- */
 @media (max-width: 768px) {
-  .hamburger {
+  .hero {
+    padding: 16px;
+  }
+
+  .hero__title {
+    font-size: 18px;
+  }
+
+  .hero__sub {
     display: block;
+    font-size: 12px;
   }
 
-  .sidebar {
-    position: fixed;
-    top: var(--header-h);
-    left: 0;
-    bottom: 0;
-    width: 75vw;
-    max-width: 300px;
-    min-width: unset;
-    z-index: 90;
-    transform: translateX(-100%);
-    transition: transform 0.2s ease;
-    overflow-y: auto;
+  .tabs {
+    padding: 0 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .sidebar--open {
-    transform: translateX(0);
+  .tab {
+    padding: 10px 14px;
+    font-size: 13px;
   }
 
   .main {
@@ -790,10 +690,6 @@ textarea { min-height: 100px; }
 
   .defense-toggles {
     flex-direction: column;
-  }
-
-  .header__title span {
-    display: none;
   }
 }
 
