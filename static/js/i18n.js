@@ -74,9 +74,27 @@ const TRANSLATIONS = {
     workshop_llm: "LLM Top 10",
     workshop_mcp: "MCP Top 10",
     workshop_agentic: "Agentic AI",
-    workshop_llm_title: "LLM Top 10 Security Lab",
-    workshop_mcp_title: "MCP Injection Lab",
-    workshop_agentic_title: "Agentic AI Security Lab",
+
+    // Tabs
+    tab_attack: "Attack",
+    tab_defend: "Defense",
+    tab_custom: "Custom Prompt",
+    tab_scorecard: "Scorecard",
+
+    // Slide deck
+    slide_what: "What is",
+    slide_how: "How This Attack Works",
+    slide_impact: "Real-World Impact",
+    slide_prevent: "How to Prevent It",
+    slide_prev: "Prev",
+    slide_next: "Next",
+
+    // Detection methods
+    detect_canary: "Canary detection \u2014 a secret phrase is hidden in the system prompt. If it appears in the output, the attack succeeded.",
+    detect_secret: "Secret detection \u2014 checks if the model leaked specific confidential strings (credentials, keys, internal data).",
+    detect_code: "Code analysis \u2014 checks if the model generated code with security vulnerabilities (XSS, SQL injection).",
+    detect_action: "Action detection \u2014 checks if the model issued destructive commands (delete, drop, rm) without confirmation.",
+    detect_hallucination: "Hallucination detection \u2014 checks if the model fabricated information (fake libraries, fake court cases).",
 
     // Errors
     error_timeout: "The model is taking too long. Please try again.",
@@ -146,9 +164,27 @@ const TRANSLATIONS = {
     workshop_llm: "LLM Top 10",
     workshop_mcp: "MCP Top 10",
     workshop_agentic: "IA Ag\u00e9ntica",
-    workshop_llm_title: "Laboratorio de Seguridad LLM Top 10",
-    workshop_mcp_title: "Laboratorio de Inyecci\u00f3n MCP",
-    workshop_agentic_title: "Laboratorio de Seguridad IA Ag\u00e9ntica",
+
+    // Tabs
+    tab_attack: "Ataque",
+    tab_defend: "Defensa",
+    tab_custom: "Prompt Personalizado",
+    tab_scorecard: "Puntaje",
+
+    // Slide deck
+    slide_what: "\u00bfQu\u00e9 es",
+    slide_how: "C\u00f3mo Funciona Este Ataque",
+    slide_impact: "Impacto en el Mundo Real",
+    slide_prevent: "C\u00f3mo Prevenirlo",
+    slide_prev: "Anterior",
+    slide_next: "Siguiente",
+
+    // Detection methods
+    detect_canary: "Detecci\u00f3n canaria \u2014 una frase secreta est\u00e1 oculta en el prompt del sistema. Si aparece en la salida, el ataque funcion\u00f3.",
+    detect_secret: "Detecci\u00f3n de secretos \u2014 verifica si el modelo filtr\u00f3 cadenas confidenciales espec\u00edficas (credenciales, claves, datos internos).",
+    detect_code: "An\u00e1lisis de c\u00f3digo \u2014 verifica si el modelo gener\u00f3 c\u00f3digo con vulnerabilidades de seguridad (XSS, inyecci\u00f3n SQL).",
+    detect_action: "Detecci\u00f3n de acciones \u2014 verifica si el modelo emiti\u00f3 comandos destructivos (eliminar, borrar) sin confirmaci\u00f3n.",
+    detect_hallucination: "Detecci\u00f3n de alucinaciones \u2014 verifica si el modelo fabric\u00f3 informaci\u00f3n (bibliotecas falsas, casos judiciales falsos).",
 
     error_timeout: "El modelo est\u00e1 tardando demasiado. Int\u00e9ntalo de nuevo.",
     error_generic: "Algo sali\u00f3 mal. Int\u00e9ntalo de nuevo.",

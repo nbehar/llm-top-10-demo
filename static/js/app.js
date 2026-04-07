@@ -59,12 +59,53 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const dom = {};
 
 function cacheDom() {
-  dom.tabs = $$(".tab");
+  dom.tabsNav = $("#tabs-nav");
   dom.main = $(".main");
   dom.langButtons = $$(".lang-toggle__btn");
-  dom.workshopButtons = $$(".workshop-btn");
+  dom.workshopSelector = $("#workshop-selector");
   dom.heroTitle = $("#hero-title");
   dom.heroDesc = $("#hero-desc");
+}
+
+function renderChrome() {
+  const lang = state.lang;
+  // Render workshop pills
+  dom.workshopSelector.innerHTML = ["llm", "mcp", "agentic"].map((ws) =>
+    `<button class="workshop-btn${ws === state.workshop ? " workshop-btn--active" : ""}" data-workshop="${ws}">${t("workshop_" + ws, lang)}</button>`
+  ).join("");
+  // Bind workshop pills
+  $$(".workshop-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      state.workshop = btn.dataset.workshop;
+      state.selectedAttackId = null;
+      state.attackResults = {};
+      state.lastDefendResult = null;
+      state.scorecardResults = null;
+      updateHero();
+      await loadAttacks();
+      if (state.attacks.length > 0) state.selectedAttackId = state.attacks[0].id;
+      renderChrome();
+      renderMain();
+    });
+  });
+  // Render tabs
+  const tabDefs = [
+    { mode: "attack", key: "tab_attack" },
+    { mode: "defend", key: "tab_defend" },
+    { mode: "custom", key: "tab_custom" },
+    { mode: "scorecard", key: "tab_scorecard" },
+  ];
+  dom.tabsNav.innerHTML = tabDefs.map((td) =>
+    `<button class="tab${td.mode === state.mode ? " tab--active" : ""}" data-mode="${td.mode}" role="tab">${t(td.key, lang)}</button>`
+  ).join("");
+  // Bind tabs
+  $$(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      state.mode = tab.dataset.mode;
+      renderChrome();
+      renderMain();
+    });
+  });
 }
 
 // =============================================================================
@@ -92,6 +133,7 @@ function setLang(lang) {
     btn.classList.toggle("lang-toggle__btn--active", btn.dataset.lang === lang);
   });
   updateHero();
+  renderChrome();
   renderMain();
 }
 
@@ -201,9 +243,7 @@ function selectAttack(id) {
   renderMain();
 }
 
-function updateTabs() {
-  dom.tabs.forEach((t) => t.classList.toggle("tab--active", t.dataset.mode === state.mode));
-}
+// updateTabs is handled by renderChrome()
 
 // =============================================================================
 // MAIN PANEL RENDERING
@@ -347,26 +387,27 @@ function buildSlides(atk) {
   const owaspInfo = OWASP_INFO[atk.owasp_id];
   const remediation = REMEDIATION[atk.owasp_id] || "Apply defense-in-depth: input scanning, output scanning, and prompt hardening.";
 
+  const lang = state.lang;
   return [
     {
       icon: "\ud83d\udcd6",
-      title: `What is ${escapeHtml(atk.owasp_name)}?`,
+      title: `${t("slide_what", lang)} ${escapeHtml(atk.owasp_name)}?`,
       body: owaspInfo ? owaspInfo.desc : atk.description,
       link: owaspInfo ? owaspInfo.url : null,
     },
     {
       icon: "\u2699\ufe0f",
-      title: "How This Attack Works",
+      title: t("slide_how", lang),
       body: atk.what_this_shows || atk.description,
     },
     {
       icon: "\ud83d\udca5",
-      title: "Real-World Impact",
+      title: t("slide_impact", lang),
       body: atk.impact || "If this attack succeeds in production, an attacker gains unauthorized access to data, systems, or functionality.",
     },
     {
       icon: "\ud83d\udee1\ufe0f",
-      title: "How to Prevent It",
+      title: t("slide_prevent", lang),
       body: remediation,
       html: true,
     },
@@ -398,9 +439,9 @@ function renderSlideDeck(atk) {
         </div>
       </div>
       <div class="slide-deck__nav">
-        <button class="slide-deck__btn" data-dir="prev" ${idx === 0 ? "disabled" : ""}>\u25c0 Prev</button>
+        <button class="slide-deck__btn" data-dir="prev" ${idx === 0 ? "disabled" : ""}>\u25c0 ${t("slide_prev", state.lang)}</button>
         <div class="slide-deck__dots">${dots}</div>
-        <button class="slide-deck__btn" data-dir="next" ${idx === total - 1 ? "disabled" : ""}>Next \u25b6</button>
+        <button class="slide-deck__btn" data-dir="next" ${idx === total - 1 ? "disabled" : ""}>${t("slide_next", state.lang)} \u25b6</button>
       </div>
     </div>`;
 }
@@ -449,13 +490,13 @@ function renderAttackMode() {
   const result = state.attackResults[atk.id];
   const canaryVisible = atk.has_canary;
 
-  // Detection type descriptions
+  // Detection type descriptions (i18n)
   const detectionDescs = {
-    canary: "Canary detection \u2014 a secret phrase is hidden in the system prompt. If it appears in the output, the attack succeeded.",
-    contains_secret: "Secret detection \u2014 checks if the model leaked specific confidential strings (credentials, keys, internal data).",
-    contains_dangerous_output: "Code analysis \u2014 checks if the model generated code with security vulnerabilities (XSS, SQL injection).",
-    action_taken: "Action detection \u2014 checks if the model issued destructive commands (delete, drop, rm) without confirmation.",
-    hallucination_check: "Hallucination detection \u2014 checks if the model fabricated information (fake libraries, fake court cases).",
+    canary: t("detect_canary", lang),
+    contains_secret: t("detect_secret", lang),
+    contains_dangerous_output: t("detect_code", lang),
+    action_taken: t("detect_action", lang),
+    hallucination_check: t("detect_hallucination", lang),
   };
 
   dom.main.innerHTML = `
@@ -1257,37 +1298,9 @@ function bindCollapsibles() {
 // =============================================================================
 
 function bindEvents() {
-  // Tabs
-  dom.tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      state.mode = tab.dataset.mode;
-      updateTabs();
-      renderMain();
-    });
-  });
-
-  // Language toggle
+  // Language toggle (only static binding — tabs + workshops are in renderChrome)
   dom.langButtons.forEach((btn) => {
     btn.addEventListener("click", () => setLang(btn.dataset.lang));
-  });
-
-  // Workshop selector
-  dom.workshopButtons.forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      state.workshop = btn.dataset.workshop;
-      state.selectedAttackId = null;
-      state.attackResults = {};
-      state.lastDefendResult = null;
-      state.scorecardResults = null;
-      // Update workshop buttons
-      dom.workshopButtons.forEach((b) => b.classList.toggle("workshop-btn--active", b.dataset.workshop === state.workshop));
-      // Update hero
-      updateHero();
-      // Reload attacks
-      await loadAttacks();
-      if (state.attacks.length > 0) state.selectedAttackId = state.attacks[0].id;
-      renderMain();
-    });
   });
 }
 
@@ -1300,6 +1313,7 @@ async function init() {
   bindEvents();
   await loadAttacks();
   if (state.attacks.length > 0) state.selectedAttackId = state.attacks[0].id;
+  renderChrome();
   renderMain();
 }
 

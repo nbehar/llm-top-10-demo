@@ -16,11 +16,7 @@
     <!-- Hero header -->
     <header class="hero">
       <div class="hero__inner">
-        <div class="workshop-selector">
-          <button class="workshop-btn workshop-btn--active" data-workshop="llm">LLM Top 10</button>
-          <button class="workshop-btn" data-workshop="mcp">MCP Top 10</button>
-          <button class="workshop-btn" data-workshop="agentic">Agentic AI</button>
-        </div>
+        <div class="workshop-selector" id="workshop-selector"></div>
         <h1 class="hero__title" id="hero-title">LLM Top 10 Security Lab <span class="hero__sub">NexaCore Technologies</span></h1>
         <h5 class="hero__org">Prof. Nikolas Behar &middot; Interactive Security Workshop</h5>
         <p class="hero__desc" id="hero-desc">
@@ -34,13 +30,8 @@
       </div>
     </header>
 
-    <!-- Tabs -->
-    <nav class="tabs" role="tablist">
-      <button class="tab tab--active" data-mode="attack" role="tab" aria-selected="true">Attack</button>
-      <button class="tab" data-mode="defend" role="tab">Defense</button>
-      <button class="tab" data-mode="custom" role="tab">Custom Prompt</button>
-      <button class="tab" data-mode="scorecard" role="tab">Scorecard</button>
-    </nav>
+    <!-- Tabs (rendered by JS for i18n) -->
+    <nav class="tabs" role="tablist" id="tabs-nav"></nav>
 
     <!-- Main content -->
     <main class="main"></main>
