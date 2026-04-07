@@ -403,11 +403,13 @@ function renderAttackResult(r) {
 
 async function handleRunAttack(atk) {
   if (state.running) return;
-  state.running = true;
-  renderMain();
 
+  // Capture form values BEFORE re-render destroys the DOM
   const userPrompt = $("#user-prompt")?.value || atk.default_user_prompt;
   const canary = $("#canary")?.value || "BANANA SUNDAE";
+
+  state.running = true;
+  renderMain();
 
   try {
     const result = await runAttack(atk.id, userPrompt, canary);
@@ -493,12 +495,14 @@ function renderDefendMode() {
       alert("Select at least one defense tool to test.");
       return;
     }
+
+    // Capture form values BEFORE re-render destroys the DOM
+    const userPrompt = $("#user-prompt-d")?.value || atk.default_user_prompt;
+    const canary = $("#canary-d")?.value || "BANANA SUNDAE";
+
     state.running = true;
     state.lastDefendResult = null;
     renderDefendMode();
-
-    const userPrompt = $("#user-prompt-d")?.value || atk.default_user_prompt;
-    const canary = $("#canary-d")?.value || "BANANA SUNDAE";
 
     try {
       const result = await runDefend(atk.id, userPrompt, canary, state.selectedDefenses);
