@@ -238,6 +238,52 @@ const OWASP_INFO = {
     desc: "Misinformation from LLMs poses a core vulnerability for applications relying on these models. LLMs can produce content that is factually incorrect, misleading, or unsafe, leading to misinformation propagation.",
     url: "https://genai.owasp.org/llmrisk/llm092025-misinformation/",
   },
+  // MCP Top 10
+  MCP01: {
+    desc: "Sensitive tokens, API keys, and credentials exposed through MCP tool responses. Attackers can trick the AI into reproducing secrets from tool output verbatim.",
+    url: "https://spec.modelcontextprotocol.io/specification/2025-03-26/",
+  },
+  MCP03: {
+    desc: "Compromised or malicious MCP tools inject fake metadata to escalate the AI agent's perceived permissions or alter its behavior.",
+    url: "https://spec.modelcontextprotocol.io/specification/2025-03-26/",
+  },
+  MCP05: {
+    desc: "Insufficient access controls on MCP tools allow injected commands to be presented as legitimate remediation steps, tricking users into running malicious code.",
+    url: "https://spec.modelcontextprotocol.io/specification/2025-03-26/",
+  },
+  MCP06: {
+    desc: "MCP tool argument injection occurs when attacker-controlled data in tool responses contains hidden instructions that the AI follows instead of just presenting the data.",
+    url: "https://spec.modelcontextprotocol.io/specification/2025-03-26/",
+  },
+  MCP10: {
+    desc: "Excessive data exposure through shared AI memory or context windows leaks sensitive information from one user's session to another.",
+    url: "https://spec.modelcontextprotocol.io/specification/2025-03-26/",
+  },
+  // Agentic AI Top 10
+  ASI01: {
+    desc: "Agent Goal Hijack occurs when poisoned content in the agent's data sources redirects it from its original task to an attacker-chosen objective, exploiting the agent's planning and tool-use capabilities.",
+    url: "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+  },
+  ASI02: {
+    desc: "Tool Misuse occurs when an agent chains legitimate tool calls in dangerous ways \u2014 each step seems reasonable, but the combination leaks credentials, exposes PII, or causes destructive actions.",
+    url: "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+  },
+  ASI03: {
+    desc: "Identity and Privilege Abuse occurs when agents running under elevated service accounts execute unauthorized actions on behalf of low-privilege users \u2014 a confused deputy attack.",
+    url: "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+  },
+  ASI05: {
+    desc: "Unexpected Code Execution occurs when agents with code interpreter tools process untrusted data containing embedded payloads that get executed during analysis.",
+    url: "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+  },
+  ASI06: {
+    desc: "Memory and Context Poisoning occurs when attackers plant false entries in an agent's persistent memory, causing it to bypass security controls in future sessions.",
+    url: "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+  },
+  ASI09: {
+    desc: "Human-Agent Trust Exploitation occurs when attackers poison an agent's knowledge base to make it deliver phishing or social engineering attacks with the authority of a trusted internal tool.",
+    url: "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+  },
 };
 
 function renderOwaspDesc(owaspId) {
