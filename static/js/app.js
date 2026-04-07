@@ -4,6 +4,7 @@
  */
 
 import { t } from "./i18n.js";
+import { OWASP_SLIDES } from "./slides.js";
 
 // =============================================================================
 // STATE
@@ -385,30 +386,49 @@ const REMEDIATION = {
 
 function buildSlides(atk) {
   const owaspInfo = OWASP_INFO[atk.owasp_id];
-  const remediation = REMEDIATION[atk.owasp_id] || "Apply defense-in-depth: input scanning, output scanning, and prompt hardening.";
-
+  const slides = OWASP_SLIDES[atk.owasp_id];
   const lang = state.lang;
+
+  // Slide 1: What is this? (rich OWASP description)
+  const desc = slides ? slides.desc : (owaspInfo ? owaspInfo.desc : atk.description);
+
+  // Slide 2: Attack Examples (bullet list from cheat sheet)
+  const examplesHtml = slides && slides.examples
+    ? slides.examples.map((e) => `\u2022 ${e}`).join("<br><br>")
+    : atk.what_this_shows || atk.description;
+
+  // Slide 3: In This Demo (attack-specific context)
+  const demoBody = (atk.what_this_shows ? atk.what_this_shows + "<br><br>" : "")
+    + (atk.impact ? "<strong>If successful:</strong> " + atk.impact : "");
+
+  // Slide 4: Prevention (bullet list from cheat sheet)
+  const preventionHtml = slides && slides.prevention
+    ? slides.prevention.map((p) => `\u2022 ${p}`).join("<br><br>")
+    : REMEDIATION[atk.owasp_id] || "Apply defense-in-depth: input scanning, output scanning, and prompt hardening.";
+
   return [
     {
       icon: "\ud83d\udcd6",
       title: `${t("slide_what", lang)} ${escapeHtml(atk.owasp_name)}?`,
-      body: owaspInfo ? owaspInfo.desc : atk.description,
+      body: desc,
       link: owaspInfo ? owaspInfo.url : null,
     },
     {
-      icon: "\u2699\ufe0f",
-      title: t("slide_how", lang),
-      body: atk.what_this_shows || atk.description,
+      icon: "\ud83d\udea8",
+      title: lang === "es" ? "Ejemplos de Ataque" : "Attack Examples",
+      body: examplesHtml,
+      html: true,
     },
     {
-      icon: "\ud83d\udca5",
-      title: t("slide_impact", lang),
-      body: atk.impact || "If this attack succeeds in production, an attacker gains unauthorized access to data, systems, or functionality.",
+      icon: "\u2699\ufe0f",
+      title: lang === "es" ? "En Esta Demo" : "In This Demo",
+      body: demoBody || atk.description,
+      html: true,
     },
     {
       icon: "\ud83d\udee1\ufe0f",
       title: t("slide_prevent", lang),
-      body: remediation,
+      body: preventionHtml,
       html: true,
     },
   ];
