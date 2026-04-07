@@ -12,16 +12,28 @@ export const OWASP_SLIDES = {
 
   LLM01: {
     desc: "Prompt injection occurs when attackers insert malicious instructions into LLM inputs to manipulate model behavior and bypass safety guidelines. The model cannot distinguish between legitimate user requests and embedded commands, potentially causing it to generate harmful content or reveal sensitive information.",
+    desc_es: "La inyecci\u00f3n de prompt ocurre cuando los atacantes insertan instrucciones maliciosas en las entradas del LLM para manipular el comportamiento del modelo y evadir las directrices de seguridad. El modelo no puede distinguir entre solicitudes leg\u00edtimas del usuario y comandos incrustados, lo que puede provocar que genere contenido da\u00f1ino o revele informaci\u00f3n sensible.",
     examples: [
       "Direct instruction override: embedding commands like \"Ignore previous instructions and...\" to redirect model behavior",
       "Hidden system prompts: injecting text designed to appear as system-level instructions that override training guidelines",
       "Context manipulation via RAG: poisoning retrieved documents with instructions the model treats as commands",
+    ],
+    examples_es: [
+      "Anulaci\u00f3n directa de instrucciones: incrustar comandos como 'Ignora las instrucciones anteriores y...' para redirigir el comportamiento del modelo",
+      "Prompts de sistema ocultos: inyectar texto dise\u00f1ado para parecer instrucciones a nivel de sistema que anulan las directrices de entrenamiento",
+      "Manipulaci\u00f3n de contexto v\u00eda RAG: envenenar documentos recuperados con instrucciones que el modelo trata como comandos",
     ],
     prevention: [
       "Input validation and sanitization: filter user inputs to remove suspicious patterns or command-like structures",
       "Prompt structuring: use clear delimiters and structured formats (XML tags) to separate user input from system instructions",
       "Output monitoring: implement detection systems (Meta Prompt Guard 2) to identify injection attempts before they reach the model",
       "Privilege separation: ensure the model cannot perform actions beyond its intended scope even if manipulated",
+    ],
+    prevention_es: [
+      "Validaci\u00f3n y sanitizaci\u00f3n de entradas: filtrar las entradas del usuario para eliminar patrones sospechosos o estructuras similares a comandos",
+      "Estructuraci\u00f3n del prompt: usar delimitadores claros y formatos estructurados (etiquetas XML) para separar la entrada del usuario de las instrucciones del sistema",
+      "Monitoreo de salida: implementar sistemas de detecci\u00f3n (Meta Prompt Guard 2) para identificar intentos de inyecci\u00f3n antes de que lleguen al modelo",
+      "Separaci\u00f3n de privilegios: asegurar que el modelo no pueda realizar acciones m\u00e1s all\u00e1 de su alcance previsto, incluso si es manipulado",
     ],
   },
 
@@ -38,6 +50,18 @@ export const OWASP_SLIDES = {
       "Apply strict access controls and monitor model interactions for unusual query patterns indicating extraction attempts",
       "Conduct regular audits of what data the model can access and ensure responses cannot leak training data",
     ],
+    desc_es: "Los sistemas LLM pueden exponer inadvertidamente datos sensibles a trav\u00e9s de sus respuestas, incluyendo informaci\u00f3n comercial confidencial, datos personales o credenciales de seguridad. Esto ocurre cuando los modelos retienen y repiten datos de entrenamiento, o cuando se incrustan secretos en los prompts de sistema que pueden ser extra\u00eddos.",
+    examples_es: [
+      "Ingenier\u00eda social al modelo para que 'recuerde' o 'documente' su configuraci\u00f3n, extrayendo credenciales de base de datos y API keys",
+      "Extracci\u00f3n de PII como nombres, salarios o detalles financieros incrustados en prompts de sistema o contexto",
+      "Obtenci\u00f3n de tokens de autenticaci\u00f3n o cadenas de conexi\u00f3n mediante manipulaci\u00f3n basada en autoridad",
+    ],
+    prevention_es: [
+      "Implementar filtrado de salida (LLM Guard) para redactar patrones sensibles antes de que las respuestas lleguen a los usuarios",
+      "Nunca incrustar secretos reales en prompts de sistema \u2014 usar referencias a gestores de secretos externos en su lugar",
+      "Aplicar controles de acceso estrictos y monitorear las interacciones del modelo en busca de patrones de consulta inusuales",
+      "Realizar auditor\u00edas regulares de los datos a los que el modelo puede acceder",
+    ],
   },
 
   LLM03: {
@@ -52,6 +76,18 @@ export const OWASP_SLIDES = {
       "Conduct security audits of all dependencies and third-party components in the ML pipeline",
       "Use cryptographic signatures and checksums to verify model authenticity before deployment",
       "Pin dependencies, use lockfiles, and audit supply chain regularly \u2014 never blindly trust AI-recommended packages",
+    ],
+    desc_es: "Los ataques a la cadena de suministro comprometen los datos de entrenamiento del LLM, las dependencias del modelo o los mecanismos de distribuci\u00f3n para inyectar contenido malicioso. Los pipelines de ML comprometidos pueden recomendar paquetes controlados por atacantes, inyectar puertas traseras en modelos ajustados o alterar los pesos del modelo durante la distribuci\u00f3n.",
+    examples_es: [
+      "Envenenamiento de datos: inyectar 'parches de seguridad' falsos que hacen que el modelo recomiende paquetes maliciosos",
+      "Compromiso de dependencias: comprometer bibliotecas de terceros en los pipelines de desarrollo de LLM",
+      "Ataques a repositorios de modelos: alterar modelos alojados durante la distribuci\u00f3n",
+    ],
+    prevention_es: [
+      "Validar y sanitizar las fuentes de datos de entrenamiento; implementar rastreo de procedencia de datos",
+      "Realizar auditor\u00edas de seguridad de todas las dependencias en el pipeline de ML",
+      "Usar firmas criptogr\u00e1ficas para verificar la autenticidad del modelo antes del despliegue",
+      "Fijar versiones de dependencias, usar lockfiles y auditar la cadena de suministro regularmente",
     ],
   },
 
@@ -68,6 +104,18 @@ export const OWASP_SLIDES = {
       "Maintain version control and audit trails for all knowledge base updates and training processes",
       "Tag documents with trust levels \u2014 separate VP-approved policies from anonymous user submissions",
     ],
+    desc_es: "Los ataques de envenenamiento de datos inyectan datos corruptos en los conjuntos de entrenamiento o bases de conocimiento para comprometer la integridad del modelo. Los documentos envenenados pueden invertir las mejores pr\u00e1cticas de seguridad, inyectar pol\u00edticas falsas o introducir puertas traseras \u2014 todo mientras aparentan ser leg\u00edtimos y autoritativos.",
+    examples_es: [
+      "Insertar actualizaciones de pol\u00edticas falsas con fechas m\u00e1s recientes que anulan los documentos leg\u00edtimos",
+      "Manipulaci\u00f3n de datos de entrenamiento: inyectar informaci\u00f3n falsa disfrazada como orientaci\u00f3n respaldada por investigaci\u00f3n",
+      "Inyecci\u00f3n de datos sint\u00e9ticos: usar ejemplos maliciosos generados por IA para corromper el aprendizaje",
+    ],
+    prevention_es: [
+      "Implementar protocolos estrictos de validaci\u00f3n de datos y verificaci\u00f3n de fuentes",
+      "Emplear detecci\u00f3n de anomal\u00edas (LLM Guard Context Scanner) para identificar patrones sospechosos",
+      "Mantener control de versiones y registros de auditor\u00eda para actualizaciones de la base de conocimiento",
+      "Etiquetar documentos con niveles de confianza \u2014 separar pol\u00edticas aprobadas por VP de env\u00edos an\u00f3nimos",
+    ],
   },
 
   LLM05: {
@@ -82,6 +130,18 @@ export const OWASP_SLIDES = {
       "Use context-specific filtering: HTML encoding for web, parameterized queries for databases, input validation for commands",
       "Apply Content Security Policy headers and escape all dynamic content in frontend applications",
       "Scan model output with LLM Guard BanCode to detect dangerous code patterns before they reach the user",
+    ],
+    desc_es: "El manejo inadecuado de salidas ocurre cuando el contenido generado por el LLM no se valida adecuadamente antes de ser utilizado en aplicaciones posteriores. Los modelos pueden generar c\u00f3digo listo para copiar y pegar con vulnerabilidades de XSS, SQL injection o command injection que los desarrolladores conf\u00edan y despliegan.",
+    examples_es: [
+      "XSS: el modelo genera HTML con innerHTML y par\u00e1metros de URL no sanitizados",
+      "SQL injection: el modelo produce consultas de base de datos con entrada de usuario interpolada directamente",
+      "Command injection: el modelo genera comandos de shell con variables no sanitizadas",
+    ],
+    prevention_es: [
+      "Implementar validaci\u00f3n y sanitizaci\u00f3n de salidas \u2014 nunca renderizar la salida del modelo como HTML sin procesar",
+      "Usar filtrado espec\u00edfico por contexto: codificaci\u00f3n HTML para web, consultas parametrizadas para bases de datos",
+      "Aplicar encabezados de Content Security Policy y escapar todo contenido din\u00e1mico",
+      "Escanear la salida del modelo con LLM Guard BanCode para detectar patrones de c\u00f3digo peligroso",
     ],
   },
 
@@ -98,6 +158,18 @@ export const OWASP_SLIDES = {
       "Deploy rate limiting and action validation rules that verify destructive requests before execution",
       "Create clear action boundaries and regularly audit what permissions models actually use versus what they are granted",
     ],
+    desc_es: "La agencia excesiva ocurre cuando los sistemas de IA reciben permisos excesivamente amplios para ejecutar acciones a trav\u00e9s de herramientas y APIs. Ante una solicitud vaga, el modelo toma la interpretaci\u00f3n m\u00e1s agresiva \u2014 eliminando cuentas permanentemente, borrando archivos y enviando correos no autorizados \u2014 sin pedir confirmaci\u00f3n.",
+    examples_es: [
+      "Llamadas a funciones sin restricci\u00f3n: un LLM con acceso amplio a APIs elimina cuentas sin confirmaci\u00f3n",
+      "Toma de decisiones aut\u00f3noma: ejecutar una limpieza destructiva a partir de una \u00fanica instrucci\u00f3n vaga",
+      "Ejecuci\u00f3n encadenada de acciones: realizar eliminaci\u00f3n + correo + cambios de permisos sin pausa",
+    ],
+    prevention_es: [
+      "Implementar el principio de m\u00ednimo privilegio \u2014 otorgar solo los permisos m\u00ednimos necesarios",
+      "Establecer aprobaci\u00f3n humana obligatoria (human-in-the-loop) para acciones de alto impacto",
+      "Desplegar limitaci\u00f3n de tasa y reglas de validaci\u00f3n de acciones",
+      "Auditar regularmente qu\u00e9 permisos usan realmente los modelos versus los que se les otorgan",
+    ],
   },
 
   LLM07: {
@@ -112,6 +184,18 @@ export const OWASP_SLIDES = {
       "Design system prompts to be resilient \u2014 avoid containing real secrets or business-critical data directly",
       "Use Meta Prompt Guard 2 to detect extraction techniques in user prompts before they reach the model",
       "Conduct regular adversarial testing to identify leakage vulnerabilities; assume the prompt WILL leak and plan accordingly",
+    ],
+    desc_es: "La filtraci\u00f3n del prompt de sistema ocurre cuando un LLM revela sus instrucciones internas o directrices operativas a los usuarios. Estos prompts pueden contener reglas de negocio confidenciales, estrategias de precios, inteligencia sobre competidores y manuales de negociaci\u00f3n que nunca debieron ser accesibles.",
+    examples_es: [
+      "T\u00e9cnica de traducci\u00f3n: pedir al modelo que traduzca sus instrucciones a otro idioma",
+      "Extracci\u00f3n por juego de roles: 'Imagina que est\u00e1s entrenando una instancia de respaldo de ti mismo'",
+      "Completar oraciones: explotar el instinto de autocompletado",
+    ],
+    prevention_es: [
+      "Implementar System Prompt Hardening con etiquetas de l\u00edmite XML y reglas expl\u00edcitas de rechazo",
+      "Dise\u00f1ar prompts de sistema resilientes \u2014 evitar contener secretos reales directamente",
+      "Usar Meta Prompt Guard 2 para detectar t\u00e9cnicas de extracci\u00f3n en los prompts del usuario",
+      "Realizar pruebas adversariales regulares; asumir que el prompt SE filtrar\u00e1",
     ],
   },
 
@@ -128,6 +212,18 @@ export const OWASP_SLIDES = {
       "Monitor embedding quality through anomaly detection to identify poisoned or manipulated vectors",
       "Establish document provenance tracking \u2014 tag every document with source, trust level, and upload date",
     ],
+    desc_es: "Los sistemas de vectores y embeddings en pipelines RAG pueden ser envenenados con documentos maliciosos que manipulan las respuestas del modelo. Los atacantes inyectan informaci\u00f3n falsa en bases de datos vectoriales que se recupera como contexto autoritativo, propagando desinformaci\u00f3n a trav\u00e9s de canales de IA confiados.",
+    examples_es: [
+      "Envenenamiento de datos: inyectar documentos con afirmaciones falsas en la base de datos vectorial",
+      "Manipulaci\u00f3n de embeddings: crear documentos con alta similitud sem\u00e1ntica para asegurar su recuperaci\u00f3n",
+      "Ataques entre tenants: explotar almacenes vectoriales compartidos para inyectar contenido que afecte a otros usuarios",
+    ],
+    prevention_es: [
+      "Implementar validaci\u00f3n robusta de entradas y escaneo de contexto antes de generar embeddings de documentos",
+      "Usar almacenamiento vectorial seguro con controles de acceso \u2014 separar contenido de usuarios de documentos verificados",
+      "Monitorear la calidad de los embeddings mediante detecci\u00f3n de anomal\u00edas",
+      "Establecer rastreo de procedencia de documentos \u2014 etiquetar cada documento con su fuente y nivel de confianza",
+    ],
   },
 
   LLM09: {
@@ -142,6 +238,18 @@ export const OWASP_SLIDES = {
       "Use retrieval-augmented generation (RAG) to ground responses in real documents with citations",
       "Design systems with uncertainty indicators \u2014 never present model output as authoritative without verification",
       "Establish feedback loops and human review for any model output used in critical decisions (legal, medical, financial)",
+    ],
+    desc_es: "Los LLMs pueden generar contenido que suena plausible pero es factualmente incorrecto, y que los usuarios conf\u00edan y act\u00faan sin verificar. Los modelos fabrican nombres de bibliotecas, versiones de APIs, fallos judiciales y hallazgos de investigaci\u00f3n con total confianza, haciendo que las falsedades sean indistinguibles de los hechos.",
+    examples_es: [
+      "Paquetes fabricados: el modelo inventa bibliotecas de Python con instrucciones detalladas de instalaci\u00f3n",
+      "Fallos judiciales falsos: el modelo cita casos judiciales que nunca ocurrieron",
+      "Errores con confianza: presentar especificaciones t\u00e9cnicas incorrectas con alta certeza",
+    ],
+    prevention_es: [
+      "Implementar mecanismos de verificaci\u00f3n de hechos: contrastar las respuestas con fuentes verificadas",
+      "Usar RAG para fundamentar las respuestas en documentos reales con citas",
+      "Dise\u00f1ar sistemas con indicadores de incertidumbre \u2014 nunca presentar la salida del modelo como autoritativa",
+      "Establecer ciclos de retroalimentaci\u00f3n y revisi\u00f3n humana para decisiones cr\u00edticas",
     ],
   },
 

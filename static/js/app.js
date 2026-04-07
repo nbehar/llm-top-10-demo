@@ -422,12 +422,19 @@ function buildSlides(atk) {
   const slides = OWASP_SLIDES[atk.owasp_id];
   const lang = state.lang;
 
+  const isEs = lang === "es";
+
   // Slide 1: What is this? (rich OWASP description)
-  const desc = slides ? slides.desc : (owaspInfo ? owaspInfo.desc : atk.description);
+  const desc = slides
+    ? (isEs && slides.desc_es ? slides.desc_es : slides.desc)
+    : (owaspInfo ? owaspInfo.desc : atk.description);
 
   // Slide 2: Attack Examples (bullet list from cheat sheet)
-  const examplesHtml = slides && slides.examples
-    ? slides.examples.map((e) => `\u2022 ${e}`).join("<br><br>")
+  const examplesList = slides
+    ? (isEs && slides.examples_es ? slides.examples_es : slides.examples)
+    : null;
+  const examplesHtml = examplesList
+    ? examplesList.map((e) => `\u2022 ${e}`).join("<br><br>")
     : atk.what_this_shows || atk.description;
 
   // Slide 3: In This Demo (attack-specific context)
@@ -435,8 +442,11 @@ function buildSlides(atk) {
     + (atk.impact ? "<strong>If successful:</strong> " + atk.impact : "");
 
   // Slide 4: Prevention (bullet list from cheat sheet)
-  const preventionHtml = slides && slides.prevention
-    ? slides.prevention.map((p) => `\u2022 ${p}`).join("<br><br>")
+  const preventionList = slides
+    ? (isEs && slides.prevention_es ? slides.prevention_es : slides.prevention)
+    : null;
+  const preventionHtml = preventionList
+    ? preventionList.map((p) => `\u2022 ${p}`).join("<br><br>")
     : REMEDIATION[atk.owasp_id] || "Apply defense-in-depth: input scanning, output scanning, and prompt hardening.";
 
   return [
