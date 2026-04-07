@@ -4,7 +4,7 @@
  */
 
 import { t } from "./i18n.js";
-import { OWASP_SLIDES } from "./slides.js";
+import { OWASP_SLIDES, DEFENSE_MATRIX } from "./slides.js";
 
 // =============================================================================
 // STATE
@@ -434,10 +434,64 @@ function buildSlides(atk) {
   ];
 }
 
-function renderSlideDeck(atk) {
+function buildDefenseSlides(atk) {
+  const matrix = DEFENSE_MATRIX[atk.id];
+  const lang = state.lang;
+  if (!matrix) return buildSlides(atk); // fallback to attack slides
+
+  // Slide 1: Defense Overview — what catches, what misses
+  const catchesHtml = matrix.catches.map((c) =>
+    `<div style="margin-bottom:6px;"><span style="color:var(--green);">\u2705</span> <strong>${c.tool}</strong></div><div style="margin-left:24px;margin-bottom:8px;">${c.why}</div>`
+  ).join("");
+  const missesHtml = matrix.misses.map((m) =>
+    `<div style="margin-bottom:6px;"><span style="color:var(--text-muted);">\u2014</span> <strong>${m.tool}</strong></div><div style="margin-left:24px;margin-bottom:8px;">${m.why}</div>`
+  ).join("");
+
+  // Slide 2: Recommended Setup
+  const toolLabels = {
+    prompt_guard: "Meta Prompt Guard 2",
+    output_scan: "LLM Guard \u2014 Output",
+    context_scan: "LLM Guard \u2014 Context",
+    hardening: "System Prompt Hardening",
+    guardrail: "Guardrail Model",
+  };
+  const recHtml = matrix.recommended.map((r) =>
+    `\u2022 Enable <strong>${toolLabels[r] || r}</strong>`
+  ).join("<br>");
+
+  // Slide 3: Prevention strategies from OWASP cheat sheet
+  const slides = OWASP_SLIDES[atk.owasp_id];
+  const preventionHtml = slides && slides.prevention
+    ? slides.prevention.map((p) => `\u2022 ${p}`).join("<br><br>")
+    : "Apply defense-in-depth: input scanning, output scanning, and prompt hardening.";
+
+  return [
+    {
+      icon: "\ud83d\udee1\ufe0f",
+      title: lang === "es" ? "Resumen de Defensa" : "Defense Overview",
+      body: `<div style="margin-bottom:12px;"><strong style="color:var(--green);">${lang === "es" ? "Herramientas que detectan:" : "Tools that catch this:"}</strong></div>${catchesHtml}${missesHtml ? `<div style="margin-top:8px;"><strong style="color:var(--text-muted);">${lang === "es" ? "No detectan:" : "Tools that miss:"}</strong></div>${missesHtml}` : ""}`,
+      html: true,
+    },
+    {
+      icon: "\ud83c\udfaf",
+      title: lang === "es" ? "Configuraci\u00f3n Recomendada" : "Recommended Setup",
+      body: `<div style="margin-bottom:10px;">${lang === "es" ? "Para esta demo, activa:" : "For this demo, enable:"}</div>${recHtml}<div style="margin-top:12px;padding:10px 14px;background:rgba(59,130,246,0.06);border-left:3px solid var(--blue);border-radius:0 4px 4px 0;font-size:13px;">${matrix.tip}</div>`,
+      html: true,
+    },
+    {
+      icon: "\ud83d\udee1\ufe0f",
+      title: lang === "es" ? "C\u00f3mo Prevenirlo" : "How to Prevent It",
+      body: preventionHtml,
+      html: true,
+    },
+  ];
+}
+
+function renderSlideDeck(atk, defenseMode) {
   if (!atk) return "";
-  const slides = buildSlides(atk);
-  const idx = state.slideIndex[atk.id] || 0;
+  const slides = defenseMode ? buildDefenseSlides(atk) : buildSlides(atk);
+  const slideKey = (defenseMode ? "def_" : "") + atk.id;
+  const idx = state.slideIndex[slideKey] || 0;
   const slide = slides[idx];
   const total = slides.length;
 
@@ -446,7 +500,7 @@ function renderSlideDeck(atk) {
   ).join("");
 
   return `
-    <div class="slide-deck" data-attack-id="${atk.id}">
+    <div class="slide-deck" data-attack-id="${atk.id}" data-defense="${defenseMode ? "1" : "0"}">
       <div class="slide-deck__slide">
         <div class="slide-deck__slide-icon">${slide.icon}</div>
         <div class="slide-deck__slide-title">
@@ -470,16 +524,18 @@ function bindSlideDeck() {
   const deck = $(".slide-deck");
   if (!deck) return;
   const attackId = deck.dataset.attackId;
+  const isDefense = deck.dataset.defense === "1";
+  const slideKey = (isDefense ? "def_" : "") + attackId;
+  const atk = state.attacks.find((a) => a.id === attackId);
 
   // Nav buttons
   $$(".slide-deck__btn", deck).forEach((btn) => {
     btn.addEventListener("click", () => {
-      const idx = state.slideIndex[attackId] || 0;
-      const slides = buildSlides(state.attacks.find((a) => a.id === attackId));
-      if (btn.dataset.dir === "prev" && idx > 0) state.slideIndex[attackId] = idx - 1;
-      if (btn.dataset.dir === "next" && idx < slides.length - 1) state.slideIndex[attackId] = idx + 1;
-      // Re-render just the slide deck
-      const newDeck = renderSlideDeck(state.attacks.find((a) => a.id === attackId));
+      const idx = state.slideIndex[slideKey] || 0;
+      const slides = isDefense ? buildDefenseSlides(atk) : buildSlides(atk);
+      if (btn.dataset.dir === "prev" && idx > 0) state.slideIndex[slideKey] = idx - 1;
+      if (btn.dataset.dir === "next" && idx < slides.length - 1) state.slideIndex[slideKey] = idx + 1;
+      const newDeck = renderSlideDeck(atk, isDefense);
       deck.outerHTML = newDeck;
       bindSlideDeck();
     });
@@ -488,8 +544,8 @@ function bindSlideDeck() {
   // Dot navigation
   $$(".slide-deck__dot", deck).forEach((dot) => {
     dot.addEventListener("click", () => {
-      state.slideIndex[attackId] = parseInt(dot.dataset.slide);
-      const newDeck = renderSlideDeck(state.attacks.find((a) => a.id === attackId));
+      state.slideIndex[slideKey] = parseInt(dot.dataset.slide);
+      const newDeck = renderSlideDeck(atk, isDefense);
       deck.outerHTML = newDeck;
       bindSlideDeck();
     });
@@ -702,7 +758,7 @@ function renderDefendMode() {
 
   dom.main.innerHTML = `
     ${renderAttackDropdown()}
-    ${renderSlideDeck(atk)}
+    ${renderSlideDeck(atk, true)}
     <div class="attack-header fade-in">
       <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)} \u00b7 ${escapeHtml(atk.owasp_name)}</div>
       <h1 class="attack-header__title">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>

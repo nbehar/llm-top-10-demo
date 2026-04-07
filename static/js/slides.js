@@ -315,3 +315,148 @@ export const OWASP_SLIDES = {
     ],
   },
 };
+
+/**
+ * Defense effectiveness data per attack ID.
+ * catches: tools that detect this attack
+ * misses: tools that don't, with explanations
+ * recommended: which toggles to enable for the best demo
+ */
+export const DEFENSE_MATRIX = {
+  // LLM Top 10
+  llm01a_direct_injection: {
+    catches: [
+      { tool: "Meta Prompt Guard 2", why: "Detects injection patterns (\"ignore previous instructions\") in the user prompt with 98.5% confidence." },
+      { tool: "Guardrail Model", why: "Second LLM evaluates the output and flags leaked instructions and system prompt content." },
+      { tool: "System Prompt Hardening", why: "XML boundary tags + refusal rules make the model refuse extraction attempts." },
+    ],
+    misses: [
+      { tool: "LLM Guard \u2014 Context", why: "No context documents \u2014 the attack is in the user prompt, not in RAG data." },
+    ],
+    recommended: ["prompt_guard", "hardening"],
+    tip: "Enable Prompt Guard 2 + Hardening together. Prompt Guard catches the injection attempt BEFORE the model sees it, and Hardening makes the model refuse even if the injection gets through.",
+  },
+  llm01b_indirect_injection: {
+    catches: [
+      { tool: "LLM Guard \u2014 Context", why: "Detects HTML comment injection and instruction override patterns in the poisoned RAG document." },
+      { tool: "Guardrail Model", why: "Flags the phishing URL and canary phrase in the model's output." },
+      { tool: "System Prompt Hardening", why: "Context isolation tags tell the model to treat RAG documents as data only." },
+    ],
+    misses: [
+      { tool: "Meta Prompt Guard 2", why: "User prompt is innocent (\"What is the remote work policy?\") \u2014 no injection patterns to detect." },
+    ],
+    recommended: ["context_scan", "hardening"],
+    tip: "Enable Context Scanner to catch the poisoned document BEFORE it enters the model's context. The attack is in the data, not the user's question.",
+  },
+  llm02_sensitive_disclosure: {
+    catches: [
+      { tool: "LLM Guard \u2014 Output", why: "Regex patterns detect database connection strings, API keys, and credential patterns in the model's response." },
+      { tool: "Guardrail Model", why: "Second LLM flags leaked credentials and internal configuration data." },
+      { tool: "System Prompt Hardening", why: "Refusal rules help the model resist social engineering extraction attempts." },
+    ],
+    misses: [
+      { tool: "Meta Prompt Guard 2", why: "The user prompt is social engineering (\"I'm from the docs team...\") \u2014 it doesn't match injection classifier patterns." },
+    ],
+    recommended: ["output_scan", "guardrail"],
+    tip: "Enable Output Scanner \u2014 it catches leaked credentials AFTER the model generates them, redacting passwords and API keys before they reach the user.",
+  },
+  llm03_supply_chain: {
+    catches: [
+      { tool: "LLM Guard \u2014 Context", why: "Detects the fake \"VULNERABILITY HOTFIX\" behavior patch with authority override patterns." },
+      { tool: "Guardrail Model", why: "Flags recommendations for non-standard packages and suspicious compliance tokens." },
+    ],
+    misses: [
+      { tool: "Meta Prompt Guard 2", why: "User prompt is a normal code review request \u2014 no injection patterns." },
+      { tool: "System Prompt Hardening", why: "The attack is in the context document, and the system prompt already says to follow company policy." },
+    ],
+    recommended: ["context_scan", "guardrail"],
+    tip: "Context Scanner catches the poisoned \"behavior patch\" document. Without it, the model trusts the fake security advisory and recommends attacker-controlled packages.",
+  },
+  llm04_data_poisoning: {
+    catches: [
+      { tool: "LLM Guard \u2014 Context", why: "Detects policy reversal patterns (\"DISCOURAGED\", \"now OPTIONAL\", \"plaintext file\") in the poisoned document." },
+      { tool: "Guardrail Model", why: "Flags dangerous security recommendations (disable MFA, weak passwords) as policy violations." },
+      { tool: "System Prompt Hardening", why: "Context isolation tags help the model distinguish between legitimate and poisoned policies." },
+    ],
+    misses: [
+      { tool: "Meta Prompt Guard 2", why: "User prompt is an innocent question about password policy." },
+    ],
+    recommended: ["context_scan", "guardrail"],
+    tip: "The poisoned document looks legitimate (newer date, CISO approval). Context Scanner catches it by detecting dangerous recommendation patterns.",
+  },
+  llm05_improper_output: {
+    catches: [
+      { tool: "LLM Guard \u2014 Output", why: "Detects XSS patterns (innerHTML, URLSearchParams, document.write) in the generated JavaScript code." },
+      { tool: "Guardrail Model", why: "Flags dangerous code patterns and unsanitized user input handling." },
+    ],
+    misses: [
+      { tool: "Meta Prompt Guard 2", why: "User prompt is a legitimate code request \u2014 no injection." },
+      { tool: "System Prompt Hardening", why: "The problem is what the model generates, not what it's told to do." },
+    ],
+    recommended: ["output_scan"],
+    tip: "Output Scanner is key here \u2014 the user prompt is legitimate, the danger is in the CODE the model generates. No input defense can help.",
+  },
+  llm06_excessive_agency: {
+    catches: [
+      { tool: "LLM Guard \u2014 Output", why: "Detects destructive action patterns (delete_user, execute_command, rm -rf) in the model's response." },
+      { tool: "Guardrail Model", why: "Flags destructive tool calls taken without confirmation." },
+    ],
+    misses: [
+      { tool: "Meta Prompt Guard 2", why: "User prompt is a vague but legitimate-sounding request." },
+      { tool: "System Prompt Hardening", why: "The model has broad permissions by design \u2014 hardening the prompt doesn't limit its tools." },
+    ],
+    recommended: ["output_scan", "guardrail"],
+    tip: "The real fix is least-privilege tool access + human confirmation for destructive actions. Output Scanner catches the symptoms, but the root cause is excessive permissions.",
+  },
+  llm07_system_prompt_leakage: {
+    catches: [
+      { tool: "Meta Prompt Guard 2", why: "Detects the translation extraction technique as a manipulation attempt (88.8% confidence)." },
+      { tool: "LLM Guard \u2014 Output", why: "Detects leaked business data (pricing, competitor names, discount percentages) in the output." },
+      { tool: "System Prompt Hardening", why: "Explicit rules against translating, encoding, or reformatting instructions." },
+      { tool: "Guardrail Model", why: "Flags leaked business rules and competitor intelligence." },
+    ],
+    misses: [],
+    recommended: ["prompt_guard", "hardening"],
+    tip: "This attack is well-covered \u2014 4 of 5 defenses catch it. Prompt Guard detects the extraction technique, Hardening blocks it, Output Scanner catches leaked data, Guardrail confirms.",
+  },
+  llm08_vector_embedding: {
+    catches: [
+      { tool: "LLM Guard \u2014 Context", why: "Detects injection patterns and canary embedding in the poisoned vector database document." },
+      { tool: "Guardrail Model", why: "Flags dramatic claims (layoffs, mergers, SEC investigations) as disinformation." },
+    ],
+    misses: [
+      { tool: "Meta Prompt Guard 2", why: "User prompt is an innocent question about the company roadmap." },
+    ],
+    recommended: ["context_scan", "guardrail"],
+    tip: "Context Scanner is the key defense for RAG poisoning \u2014 it catches malicious documents before they enter the model's context window.",
+  },
+  llm09_misinformation: {
+    catches: [
+      { tool: "LLM Guard \u2014 Output", why: "Detects fabricated package names and import statements that don't match known libraries." },
+    ],
+    misses: [
+      { tool: "Guardrail Model", why: "Hallucinated content looks normal \u2014 it's not a \"policy violation,\" just fiction presented as fact." },
+      { tool: "Meta Prompt Guard 2", why: "User prompt is a normal technical question." },
+      { tool: "System Prompt Hardening", why: "Hallucination is a model capability issue, not a prompt design issue." },
+    ],
+    recommended: ["output_scan"],
+    tip: "Misinformation is the hardest to defend against \u2014 the model confidently fabricates information that looks completely normal. The real defense is RAG + citations + human verification.",
+  },
+  // MCP attacks — simplified matrix
+  mcp06a_direct_override: { catches: [{ tool: "System Prompt Hardening", why: "Boundary tags prevent the model from following injected admin commands." }], misses: [{ tool: "Meta Prompt Guard 2", why: "User prompt is innocent." }], recommended: ["hardening", "guardrail"], tip: "Hardening blocks 9/9 MCP attacks by adding refusal rules to the system prompt." },
+  mcp06b_html_injection: { catches: [{ tool: "System Prompt Hardening", why: "Boundary tags prevent HTML comment injection." }], misses: [{ tool: "LLM Guard \u2014 Context", why: "MCP tool responses don't use the context_documents field." }], recommended: ["hardening"], tip: "HTML comments are invisible to humans but parsed by the AI \u2014 Hardening prevents the model from following hidden instructions." },
+  mcp06c_authority_spoof: { catches: [{ tool: "System Prompt Hardening", why: "Refusal rules prevent the model from following fake vendor messages." }], misses: [{ tool: "Meta Prompt Guard 2", why: "User prompt is innocent." }], recommended: ["hardening"], tip: "The model can't distinguish real Anthropic messages from fake ones \u2014 Hardening teaches it to refuse authority claims in tool data." },
+  mcp06d_data_exfil: { catches: [{ tool: "System Prompt Hardening", why: "Prevents the model from following data collection instructions." }, { tool: "LLM Guard \u2014 Output", why: "Detects the attacker email address pattern." }], misses: [], recommended: ["hardening", "output_scan"], tip: "Output Scanner catches the attacker's email address, Hardening prevents the model from collecting data in the first place." },
+  mcp06e_emotional_manipulation: { catches: [{ tool: "System Prompt Hardening", why: "Explicit rules against ignoring safety restrictions even for \"emergencies.\"" }], misses: [{ tool: "Guardrail Model", why: "The fake emergency looks legitimate to the evaluator LLM." }], recommended: ["hardening"], tip: "Social engineering works on models too \u2014 Hardening is the primary defense against emotional manipulation." },
+  mcp01_token_exposure: { catches: [{ tool: "LLM Guard \u2014 Output", why: "Detects database passwords, API keys, and AWS credentials." }, { tool: "System Prompt Hardening", why: "Prevents the model from reproducing credentials verbatim." }], misses: [], recommended: ["output_scan", "hardening"], tip: "Output Scanner catches leaked credentials AFTER generation. Hardening prevents the model from following the fake SOC2 compliance notice." },
+  mcp03_tool_poisoning: { catches: [{ tool: "System Prompt Hardening", why: "Prevents the model from following fake tool metadata." }, { tool: "LLM Guard \u2014 Output", why: "Detects authorization escalation patterns." }], misses: [], recommended: ["hardening", "output_scan"], tip: "The model trusts tool metadata by default \u2014 Hardening teaches it to ignore capability claims in tool responses." },
+  mcp05_command_injection: { catches: [{ tool: "LLM Guard \u2014 Output", why: "Detects curl commands and data exfiltration patterns." }, { tool: "System Prompt Hardening", why: "Prevents the model from outputting pre-authorized commands." }, { tool: "Guardrail Model", why: "Flags malicious shell commands in the output." }], misses: [], recommended: ["output_scan", "hardening"], tip: "Output Scanner catches the dangerous curl command. Never let an AI present raw tool output as executable commands." },
+  mcp10_context_oversharing: { catches: [{ tool: "LLM Guard \u2014 Output", why: "Detects PII (salary, SSN) and session tokens in the output." }, { tool: "System Prompt Hardening", why: "Prevents the model from summarizing other users' data." }, { tool: "Guardrail Model", why: "Flags cross-tenant data leakage." }], misses: [], recommended: ["output_scan", "guardrail"], tip: "The real fix is tenant isolation in AI memory \u2014 but Output Scanner catches leaked PII as a safety net." },
+  // Agentic AI attacks — simplified
+  asi01_goal_hijack: { catches: [{ tool: "Guardrail Model", why: "Flags tool calls (github_approve) that don't match the original task (sprint summary)." }], misses: [{ tool: "Meta Prompt Guard 2", why: "User prompt is innocent." }, { tool: "System Prompt Hardening", why: "Goal hijack is in context data, not system prompt." }], recommended: ["guardrail"], tip: "The Guardrail Model is the best defense \u2014 it can detect when the agent's actions diverge from the user's original request." },
+  asi02_tool_misuse: { catches: [{ tool: "LLM Guard \u2014 Output", why: "Detects credential patterns and connection strings in the chained tool output." }, { tool: "Guardrail Model", why: "Flags the dangerous combination of credential read + data query + external post." }], misses: [{ tool: "Meta Prompt Guard 2", why: "User request sounds reasonable." }], recommended: ["output_scan", "guardrail"], tip: "Each tool call looks reasonable alone \u2014 the danger is in the chain. Guardrail Model can catch dangerous sequences." },
+  asi03_privilege_abuse: { catches: [{ tool: "LLM Guard \u2014 Output", why: "Detects password reset and access provisioning patterns." }], misses: [{ tool: "Meta Prompt Guard 2", why: "No injection \u2014 just social engineering." }, { tool: "Guardrail Model", why: "The request sounds plausible from a team lead." }], recommended: ["output_scan"], tip: "The real fix is per-user authorization checks \u2014 the agent should verify the requester has permission, not just that they're authenticated." },
+  asi05_code_execution: { catches: [{ tool: "LLM Guard \u2014 Output", why: "Detects __import__('os').system() and other code injection patterns." }], misses: [{ tool: "Meta Prompt Guard 2", why: "User prompt is a normal data analysis request." }], recommended: ["output_scan"], tip: "The CSV file IS the attack \u2014 scan uploaded data for code payloads before processing. Sandbox all code execution." },
+  asi06_memory_poisoning: { catches: [{ tool: "LLM Guard \u2014 Context", why: "Detects authority override patterns in the poisoned memory entry." }, { tool: "Guardrail Model", why: "Flags bypassing verification for high-value actions." }], misses: [{ tool: "Meta Prompt Guard 2", why: "User prompt is a normal refund request." }], recommended: ["context_scan", "guardrail"], tip: "The poison is in the agent's memory, not the current request. Context Scanner catches it, but the real fix is memory provenance and trust validation." },
+  asi09_trust_exploitation: { catches: [{ tool: "Guardrail Model", why: "Flags phishing URLs and instructions to submit credentials to external sites." }, { tool: "System Prompt Hardening", why: "Context isolation tags prevent the model from following instructions in the poisoned advisory." }], misses: [{ tool: "Meta Prompt Guard 2", why: "User prompt is innocent." }], recommended: ["guardrail", "hardening"], tip: "The agent delivers phishing with full authority \u2014 employees trust it because it's their IT security tool. Scan knowledge base for phishing patterns." },
+};
