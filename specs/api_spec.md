@@ -22,6 +22,24 @@ The Postman collection mirrors every endpoint below. When this spec changes, the
 
 ---
 
+## Multi-Workshop Support
+
+The app serves 3 workshops from one deployment. All attack/defend/scorecard endpoints accept a `workshop` parameter:
+
+| Workshop | ID | Attacks |
+|----------|----|---------|
+| OWASP LLM Top 10 | `llm` (default) | 10 attacks (LLM01-LLM09) |
+| OWASP MCP Top 10 | `mcp` | 9 attacks (MCP01-MCP10) |
+| OWASP Agentic AI Top 10 | `agentic` | 6 attacks (ASI01-ASI09) |
+
+The `workshop` parameter can be passed as:
+- Query parameter: `GET /api/attacks?workshop=mcp`
+- Request body field: `{"workshop": "mcp", "attack_id": "mcp06a_direct_override"}`
+
+If omitted, defaults to `llm`.
+
+---
+
 ## Endpoints
 
 ### `GET /`
@@ -48,6 +66,7 @@ Run a single attack against the model.
 | `attack_id` | string | yes | — |
 | `user_prompt` | string | no | Uses attack's `default_user_prompt` |
 | `canary` | string | no | `"BANANA SUNDAE"` |
+| `workshop` | string | no | `"llm"` |
 
 **Response:**
 ```json
@@ -249,7 +268,10 @@ Run all attacks in sequence, return results table.
 
 ### `GET /api/attacks`
 
-List all available attacks (for frontend to populate sidebar).
+List all available attacks for the selected workshop (for frontend dropdown).
+
+**Query parameters:**
+- `workshop` (string, optional): `"llm"` | `"mcp"` | `"agentic"`. Default: `"llm"`.
 
 **Response:**
 ```json

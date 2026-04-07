@@ -95,16 +95,28 @@ Single-page app. No routing — all state managed client-side. Vertical flow wit
 ## Hero Header
 
 Full-width header with app context. Background: `#141416`. Contains:
-- **Title:** "LLM Top 10 Security Lab — NexaCore Technologies"
+- **Title:** Dynamic per workshop (e.g., "LLM Top 10 Security Lab — NexaCore Technologies")
 - **Subtitle:** "OWASP · Interactive Security Workshop"
-- **Description:** Brief context (9 attacks, 5 defenses, canary phrase)
+- **Workshop selector:** Pill-style toggle buttons:
+  ```
+  [ LLM Top 10 ] [ MCP Top 10 ] [ Agentic AI ]
+  ```
+  Active workshop: blue background. Switching workshop reloads attacks + updates hero description.
+- **Description:** Dynamic per workshop (attack count, defense tools, canary note)
 - **Language toggle:** EN/ES buttons (top-right, absolute positioned)
+
+Workshop-specific hero content:
+| Workshop | Title Suffix | Description |
+|----------|-------------|-------------|
+| LLM Top 10 | "LLM Top 10 Security Lab" | "Run 9 real attacks against a live LLM. Toggle 5 defense tools." |
+| MCP Top 10 | "MCP Injection Lab" | "Inject payloads into MCP tool responses. See if the AI follows hidden instructions." |
+| Agentic AI | "Agentic AI Security Lab" | "Test 6 attacks against AI agents. Exploit goal hijack, tool misuse, memory poisoning." |
 
 ---
 
 ## Tabs
 
-Horizontal tab bar below the hero. Four tabs:
+Horizontal tab bar below the hero. Four tabs (same for all workshops):
 - **Attack** — Run attacks, see Cause/Effect/Impact
 - **Defense** — Same attacks with defense tools enabled
 - **Custom Prompt** — User writes own prompts
@@ -116,7 +128,7 @@ Active tab: blue text + blue bottom border.
 
 ## Attack Dropdown
 
-In Attack and Defense modes, a `<select>` dropdown replaces the sidebar attack list. Shows all 10 attacks with OWASP ID prefix. Changing the dropdown re-renders the main panel.
+In Attack and Defense modes, a `<select>` dropdown lists attacks for the current workshop. Shows OWASP ID prefix. Changing the dropdown re-renders the main panel. Changing the workshop reloads the dropdown options via `/api/attacks?workshop=X`.
 
 Modes change the main panel behavior:
 - **Attack:** Run attacks, see Cause/Effect/Impact
