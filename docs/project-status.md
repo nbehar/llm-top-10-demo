@@ -1,6 +1,6 @@
 # Project Status — OWASP AI Security Workshop Platform
 
-*Last updated: 2026-04-07 (Session 5)*
+*Last updated: 2026-04-07 (Session 6)*
 
 ---------------------------------------------------------------------
 
@@ -232,3 +232,21 @@ Single HuggingFace Space serving 3 OWASP security workshops:
 - **ML Top 10 skipped:** Most risks need training pipeline access, demoable ones overlap with LLM Top 10
 - **Slide content:** Generated dynamically from OWASP_SLIDES + DEFENSE_MATRIX, not hardcoded per attack
 - **Defense slides:** Separate from attack slides — show effectiveness matrix, recommended toggles, tactical tips
+
+### Session 6 — 2026-04-07
+
+**What was accomplished:**
+
+1. Defense Lab UI polish: CSS grid toggles, preset buttons (None/Basic/All), better active states
+2. Slide deck now collapsible (collapsed by default) — "Learn about this attack" toggle
+3. Attack header streamlined: single-line OWASP badge + title + difficulty + detection chip
+4. Removed redundant description paragraph (already in slide content)
+5. Scorecard text now dynamic per workshop (not hardcoded "LLM Top 10")
+6. Difficulty badges (Easy/Medium/Hard) on all 25 attacks
+7. Footer updated to "Prof. Nikolas Behar · OWASP GenAI Security Project"
+8. Defense toggle descriptions translated to Spanish
+9. Created 8 GitHub issues for deferred improvements (#24-31)
+10. Created 11 GitHub issues for future multimodal/CV/custom model labs (#13-23)
+11. Created GitHub issue #12 for knowledge checks/quizzes (paid tier)
+
+**Open issues:** 31 total (2 closed, 29 open) covering future labs, polish items, and paid features
