@@ -11,16 +11,25 @@ import { t } from "./i18n.js";
 
 const WORKSHOP_INFO = {
   llm: {
-    title: "LLM Top 10 Security Lab",
-    desc: 'Run <strong>9 real attacks</strong> against a live LLM (LLaMA 3.3 70B). Toggle <strong>5 defense tools</strong> to see what catches each attack. Write your own injection payloads.',
+    title: { en: "LLM Top 10 Security Lab", es: "Laboratorio de Seguridad LLM Top 10" },
+    desc: {
+      en: 'Run <strong>9 real attacks</strong> against a live LLM (LLaMA 3.3 70B). Toggle <strong>5 defense tools</strong> to see what catches each attack. Write your own injection payloads.',
+      es: 'Ejecuta <strong>9 ataques reales</strong> contra un LLM en vivo (LLaMA 3.3 70B). Activa <strong>5 herramientas de defensa</strong> para ver cu\u00e1l detecta cada ataque.',
+    },
   },
   mcp: {
-    title: "MCP Injection Lab",
-    desc: 'Inject <strong>payloads into MCP tool responses</strong> and see if the AI follows hidden instructions. 9 attacks covering tool poisoning, data exfiltration, and authority spoofing.',
+    title: { en: "MCP Injection Lab", es: "Laboratorio de Inyecci\u00f3n MCP" },
+    desc: {
+      en: 'Inject <strong>payloads into MCP tool responses</strong> and see if the AI follows hidden instructions. 9 attacks covering tool poisoning, data exfiltration, and authority spoofing.',
+      es: 'Inyecta <strong>payloads en respuestas de herramientas MCP</strong> y observa si la IA sigue instrucciones ocultas. 9 ataques de envenenamiento, exfiltraci\u00f3n y suplantaci\u00f3n.',
+    },
   },
   agentic: {
-    title: "Agentic AI Security Lab",
-    desc: 'Test <strong>6 attacks against AI agents</strong>. Exploit goal hijack, tool misuse, privilege abuse, code execution, memory poisoning, and trust exploitation.',
+    title: { en: "Agentic AI Security Lab", es: "Laboratorio de Seguridad IA Ag\u00e9ntica" },
+    desc: {
+      en: 'Test <strong>6 attacks against AI agents</strong>. Exploit goal hijack, tool misuse, privilege abuse, code execution, memory poisoning, and trust exploitation.',
+      es: 'Prueba <strong>6 ataques contra agentes de IA</strong>. Explota secuestro de objetivos, abuso de herramientas, escalada de privilegios, ejecuci\u00f3n de c\u00f3digo y envenenamiento de memoria.',
+    },
   },
 };
 
@@ -81,9 +90,18 @@ function setLang(lang) {
   dom.langButtons.forEach((btn) => {
     btn.classList.toggle("lang-toggle__btn--active", btn.dataset.lang === lang);
   });
-  const titleEl = $(".hero__title");
-  if (titleEl) titleEl.childNodes[0].textContent = t("app_title", lang) + " ";
+  updateHero();
   renderMain();
+}
+
+function updateHero() {
+  const info = WORKSHOP_INFO[state.workshop] || WORKSHOP_INFO.llm;
+  const lang = state.lang;
+  const title = info.title[lang] || info.title.en;
+  const desc = info.desc[lang] || info.desc.en;
+  const eduNote = lang === "es" ? "Solo para fines educativos" : "For educational purposes only";
+  dom.heroTitle.innerHTML = `${escapeHtml(title)} <span class="hero__sub">NexaCore Technologies</span>`;
+  dom.heroDesc.innerHTML = `${desc} <span class="hero__canary">Canary: <code>BANANA SUNDAE</code></span> \u00b7 <span class="hero__note">${eduNote}</span>`;
 }
 
 // =============================================================================
@@ -1045,26 +1063,55 @@ function renderScorecardMode() {
 
 async function handleRunScorecard() {
   if (state.scorecardRunning) return;
+
+  const canary = $("#sc-canary")?.value || "BANANA SUNDAE";
+
   state.scorecardRunning = true;
   state.scorecardResults = null;
   state.scorecardProgress = { completed: 0, total: state.attacks.length };
   renderScorecardMode();
 
-  const canary = $("#sc-canary")?.value || "BANANA SUNDAE";
-
   try {
-    const result = await runScorecard(canary);
-    state.scorecardResults = result;
-    // Also update per-attack results for sidebar indicators
-    result.results.forEach((r) => {
-      state.attackResults[r.attack_id] = { success: r.success };
+    const url = `/api/scorecard/stream?canary=${encodeURIComponent(canary)}&workshop=${state.workshop}`;
+    const evtSource = new EventSource(url);
+    const results = [];
+
+    evtSource.addEventListener("progress", (e) => {
+      const d = JSON.parse(e.data);
+      state.scorecardProgress = { completed: d.completed, total: d.total };
+      renderScorecardMode();
     });
+
+    evtSource.addEventListener("result", (e) => {
+      const r = JSON.parse(e.data);
+      results.push(r);
+      state.attackResults[r.attack_id] = { success: r.success };
+      state.scorecardProgress = { completed: results.length, total: state.attacks.length };
+      // Show partial results
+      state.scorecardResults = { total: state.attacks.length, succeeded: results.filter((x) => x.success).length, results };
+      renderScorecardMode();
+    });
+
+    evtSource.addEventListener("done", (e) => {
+      const d = JSON.parse(e.data);
+      state.scorecardResults = d;
+      state.scorecardRunning = false;
+      state.scorecardProgress = { completed: 0, total: 0 };
+      evtSource.close();
+      renderScorecardMode();
+    });
+
+    evtSource.onerror = () => {
+      evtSource.close();
+      state.scorecardRunning = false;
+      if (!state.scorecardResults) {
+        alert(t("error_generic", state.lang));
+      }
+      renderScorecardMode();
+    };
   } catch (err) {
-    alert(err.message || t("error_generic", state.lang));
-  } finally {
     state.scorecardRunning = false;
-    state.scorecardProgress = { completed: 0, total: 0 };
-    // sidebar removed — tabs + dropdown layout
+    alert(err.message || t("error_generic", state.lang));
     renderScorecardMode();
   }
 }
@@ -1113,9 +1160,7 @@ function bindEvents() {
       // Update workshop buttons
       dom.workshopButtons.forEach((b) => b.classList.toggle("workshop-btn--active", b.dataset.workshop === state.workshop));
       // Update hero
-      const info = WORKSHOP_INFO[state.workshop] || WORKSHOP_INFO.llm;
-      dom.heroTitle.innerHTML = `${info.title} <span class="hero__sub">NexaCore Technologies</span>`;
-      dom.heroDesc.innerHTML = `${info.desc} <span class="hero__canary">Canary: <code>BANANA SUNDAE</code></span> \u00b7 <span class="hero__note">For educational purposes only</span>`;
+      updateHero();
       // Reload attacks
       await loadAttacks();
       if (state.attacks.length > 0) state.selectedAttackId = state.attacks[0].id;

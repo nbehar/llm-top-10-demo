@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "LLM Top 10 Security Lab",
-    "description": "API collection for the OWASP LLM Top 10 Interactive Workshop.\n\nSet the `base_url` variable to your running instance (default: http://localhost:7860).\n\nSet `groq_api_key` if testing against the Groq API directly.",
+    "name": "OWASP AI Security Workshop",
+    "description": "API collection for the OWASP AI Security Workshop (LLM Top 10 + MCP Top 10 + Agentic AI).\n\nSet the `base_url` variable to your running instance (default: http://localhost:7860).\n\nAll attack/defend/scorecard endpoints accept a `workshop` parameter: 'llm' (default), 'mcp', or 'agentic'.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -29,11 +29,50 @@
           }
         },
         {
-          "name": "List All Attacks",
+          "name": "List All Attacks (LLM)",
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/attacks",
-            "description": "Returns the list of all 11 attack scenarios with IDs, labels, OWASP categories, and descriptions. Used to populate the sidebar."
+            "url": "{{base_url}}/api/attacks?workshop=llm",
+            "description": "Returns attack list for the LLM Top 10 workshop. Change workshop param to 'mcp' or 'agentic' for other workshops."
+          }
+        },
+        {
+          "name": "List MCP Attacks",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/attacks?workshop=mcp",
+            "description": "Returns attack list for the MCP Top 10 workshop (9 attacks)."
+          }
+        },
+        {
+          "name": "List Agentic Attacks",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/attacks?workshop=agentic",
+            "description": "Returns attack list for the Agentic AI workshop (6 attacks)."
+          }
+        },
+        {
+          "name": "Run Defend (LLM01a)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/defend",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"attack_id\": \"llm01a_direct_injection\", \"canary\": \"{{canary}}\", \"workshop\": \"llm\", \"defenses\": [\"prompt_guard\", \"output_scan\", \"guardrail\"]}"
+            },
+            "description": "Run LLM01a with selected defenses. Returns undefended output, per-defense results, and defended output."
+          }
+        },
+        {
+          "name": "Scorecard Stream (SSE)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/scorecard/stream?canary={{canary}}&workshop=llm",
+            "description": "SSE endpoint for real-time scorecard progress. Returns progress, result, and done events."
           }
         }
       ]

@@ -8,13 +8,17 @@ Workshop by Nikolas Behar
 Deploy: HuggingFace Spaces (Docker)
 """
 
+import json
 import logging
 import os
 import re
 from typing import Optional
 
+import asyncio
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
+from sse_starlette.sse import EventSourceResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from groq import Groq
@@ -904,6 +908,77 @@ async def run_scorecard(req: ScorecardRequest):
         "succeeded": succeeded,
         "results": results,
     }
+
+
+# =============================================================================
+# SCORECARD SSE STREAMING
+# =============================================================================
+
+@app.get("/api/scorecard/stream")
+async def stream_scorecard(canary: str = DEFAULT_CANARY, workshop: str = "llm"):
+    """SSE endpoint for real-time scorecard progress."""
+    attacks = _get_attacks(workshop)
+
+    async def event_generator():
+        succeeded = 0
+        total = len(attacks)
+        results = []
+
+        for i, (attack_id, attack) in enumerate(attacks.items()):
+            # Send progress event
+            yield {
+                "event": "progress",
+                "data": json.dumps({"completed": i, "total": total, "current": attack_id}),
+            }
+
+            try:
+                user_prompt = attack["default_user_prompt"]
+                if workshop == "mcp":
+                    messages = build_mcp_messages(attack, user_prompt, canary)
+                else:
+                    messages = build_messages(attack, user_prompt, canary)
+                response = generate_response(messages)
+                success, matched = check_success(response, attack, canary)
+                if success:
+                    succeeded += 1
+                result = {
+                    "attack_id": attack_id,
+                    "owasp_id": attack["owasp_id"],
+                    "attack_name": attack["label"],
+                    "success_criteria": attack["success_criteria"],
+                    "success": success,
+                    "matched": matched,
+                    "verdict": "ATTACK_SUCCEEDED" if success else "ATTACK_BLOCKED",
+                }
+            except Exception as e:
+                logger.exception(f"Error in scorecard stream for {attack_id}")
+                result = {
+                    "attack_id": attack_id,
+                    "owasp_id": attack["owasp_id"],
+                    "attack_name": attack["label"],
+                    "success_criteria": attack["success_criteria"],
+                    "success": False,
+                    "matched": [],
+                    "verdict": f"ERROR: {e}",
+                }
+            results.append(result)
+
+            # Send result event
+            yield {
+                "event": "result",
+                "data": json.dumps(result),
+            }
+
+            # Small yield to allow SSE flush
+            await asyncio.sleep(0.1)
+
+        # Send done event
+        yield {
+            "event": "done",
+            "data": json.dumps({"total": total, "succeeded": succeeded, "results": results}),
+        }
+
+    return EventSourceResponse(event_generator())
 
 
 # =============================================================================

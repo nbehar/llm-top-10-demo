@@ -70,6 +70,14 @@ const TRANSLATIONS = {
     // Footer
     footer_text: "Workshop by Nikolas Behar",
 
+    // Workshops
+    workshop_llm: "LLM Top 10",
+    workshop_mcp: "MCP Top 10",
+    workshop_agentic: "Agentic AI",
+    workshop_llm_title: "LLM Top 10 Security Lab",
+    workshop_mcp_title: "MCP Injection Lab",
+    workshop_agentic_title: "Agentic AI Security Lab",
+
     // Errors
     error_timeout: "The model is taking too long. Please try again.",
     error_generic: "Something went wrong. Please try again.",
@@ -133,6 +141,14 @@ const TRANSLATIONS = {
     empty_sub: "Elige un ataque de la barra lateral para comenzar",
 
     footer_text: "Taller por Nikolas Behar",
+
+    // Workshops
+    workshop_llm: "LLM Top 10",
+    workshop_mcp: "MCP Top 10",
+    workshop_agentic: "IA Ag\u00e9ntica",
+    workshop_llm_title: "Laboratorio de Seguridad LLM Top 10",
+    workshop_mcp_title: "Laboratorio de Inyecci\u00f3n MCP",
+    workshop_agentic_title: "Laboratorio de Seguridad IA Ag\u00e9ntica",
 
     error_timeout: "El modelo est\u00e1 tardando demasiado. Int\u00e9ntalo de nuevo.",
     error_generic: "Algo sali\u00f3 mal. Int\u00e9ntalo de nuevo.",
