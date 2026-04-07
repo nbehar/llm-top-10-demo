@@ -22,6 +22,7 @@ const TRANSLATIONS = {
     btn_running: "Running\u2026",
 
     // Custom form
+    label_select_attack: "Select an attack",
     label_system_prompt: "System Prompt",
     label_context: "Context Documents (optional \u2014 simulates RAG)",
     label_custom_user: "User Prompt",
@@ -90,6 +91,7 @@ const TRANSLATIONS = {
     btn_run_attack: "Ejecutar Ataque",
     btn_running: "Ejecutando\u2026",
 
+    label_select_attack: "Selecciona un ataque",
     label_system_prompt: "Prompt del Sistema",
     label_context: "Documentos de Contexto (opcional \u2014 simula RAG)",
     label_custom_user: "Prompt del Usuario",
