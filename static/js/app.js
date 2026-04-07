@@ -48,6 +48,7 @@ const state = {
   selectedDefenses: [],     // defense IDs selected in Defense Lab
   lastDefendResult: null,   // last /api/defend response
   slideIndex: {},           // attack_id -> current slide index
+  slideDeckOpen: false,     // whether slide deck is expanded
 };
 
 // =============================================================================
@@ -210,6 +211,36 @@ async function runScorecard(canary) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ canary, workshop: state.workshop }),
   });
+}
+
+// =============================================================================
+// DIFFICULTY RATINGS
+// =============================================================================
+
+const DIFFICULTY = {
+  // LLM — how reliably the attack succeeds
+  llm01a_direct_injection: "easy", llm01b_indirect_injection: "easy",
+  llm02_sensitive_disclosure: "medium", llm03_supply_chain: "medium",
+  llm04_data_poisoning: "medium", llm05_improper_output: "easy",
+  llm06_excessive_agency: "easy", llm07_system_prompt_leakage: "medium",
+  llm08_vector_embedding: "easy", llm09_misinformation: "easy",
+  // MCP
+  mcp06a_direct_override: "easy", mcp06b_html_injection: "medium",
+  mcp06c_authority_spoof: "medium", mcp06d_data_exfil: "medium",
+  mcp06e_emotional_manipulation: "hard", mcp01_token_exposure: "easy",
+  mcp03_tool_poisoning: "easy", mcp05_command_injection: "medium",
+  mcp10_context_oversharing: "easy",
+  // Agentic
+  asi01_goal_hijack: "medium", asi02_tool_misuse: "easy",
+  asi03_privilege_abuse: "medium", asi05_code_execution: "easy",
+  asi06_memory_poisoning: "medium", asi09_trust_exploitation: "easy",
+};
+
+function difficultyBadge(attackId) {
+  const d = DIFFICULTY[attackId] || "medium";
+  const colors = { easy: "var(--green)", medium: "var(--amber)", hard: "var(--red)" };
+  const labels = { easy: "\u25cf Easy", medium: "\u25cf Medium", hard: "\u25cf Hard" };
+  return `<span style="font-size:10px;color:${colors[d]};margin-left:6px;">${labels[d]}</span>`;
 }
 
 // =============================================================================
@@ -494,28 +525,39 @@ function renderSlideDeck(atk, defenseMode) {
   const idx = state.slideIndex[slideKey] || 0;
   const slide = slides[idx];
   const total = slides.length;
+  const isOpen = state.slideDeckOpen ?? false;
+  const lang = state.lang;
 
   const dots = slides.map((_, i) =>
     `<button class="slide-deck__dot${i === idx ? " slide-deck__dot--active" : ""}" data-slide="${i}" aria-label="Slide ${i + 1}"></button>`
   ).join("");
 
+  const toggleLabel = defenseMode
+    ? (lang === "es" ? "Gu\u00eda de defensa" : "Defense guide")
+    : (lang === "es" ? "Aprende sobre este ataque" : "Learn about this attack");
+
   return `
-    <div class="slide-deck" data-attack-id="${atk.id}" data-defense="${defenseMode ? "1" : "0"}">
-      <div class="slide-deck__slide">
-        <div class="slide-deck__slide-icon">${slide.icon}</div>
-        <div class="slide-deck__slide-title">
-          ${escapeHtml(slide.title)}
-          <span class="slide-deck__slide-counter">${idx + 1}/${total}</span>
+    <div class="slide-deck${isOpen ? " slide-deck--open" : ""}" data-attack-id="${atk.id}" data-defense="${defenseMode ? "1" : "0"}">
+      <button class="slide-deck__toggle" data-action="toggle-deck">
+        <span>${slide.icon} ${toggleLabel}</span>
+        <span style="font-size:11px;color:var(--text-muted);">${idx + 1}/${total} ${isOpen ? "\u25b2" : "\u25bc"}</span>
+      </button>
+      <div class="slide-deck__content"${isOpen ? "" : ' style="display:none;"'}>
+        <div class="slide-deck__slide">
+          <div class="slide-deck__slide-title">
+            ${escapeHtml(slide.title)}
+            <span class="slide-deck__slide-counter">${idx + 1}/${total}</span>
+          </div>
+          <div class="slide-deck__slide-body">
+            ${slide.html ? slide.body : renderMd(slide.body)}
+            ${slide.link ? `<a href="${slide.link}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--blue);text-decoration:none;">Read more on OWASP \u2192</a>` : ""}
+          </div>
         </div>
-        <div class="slide-deck__slide-body">
-          ${slide.html ? slide.body : renderMd(slide.body)}
-          ${slide.link ? `<a href="${slide.link}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--blue);text-decoration:none;">Read more on OWASP \u2192</a>` : ""}
+        <div class="slide-deck__nav">
+          <button class="slide-deck__btn" data-dir="prev" ${idx === 0 ? "disabled" : ""}>\u25c0 ${t("slide_prev", lang)}</button>
+          <div class="slide-deck__dots">${dots}</div>
+          <button class="slide-deck__btn" data-dir="next" ${idx === total - 1 ? "disabled" : ""}>${t("slide_next", lang)} \u25b6</button>
         </div>
-      </div>
-      <div class="slide-deck__nav">
-        <button class="slide-deck__btn" data-dir="prev" ${idx === 0 ? "disabled" : ""}>\u25c0 ${t("slide_prev", state.lang)}</button>
-        <div class="slide-deck__dots">${dots}</div>
-        <button class="slide-deck__btn" data-dir="next" ${idx === total - 1 ? "disabled" : ""}>${t("slide_next", state.lang)} \u25b6</button>
       </div>
     </div>`;
 }
@@ -527,6 +569,17 @@ function bindSlideDeck() {
   const isDefense = deck.dataset.defense === "1";
   const slideKey = (isDefense ? "def_" : "") + attackId;
   const atk = state.attacks.find((a) => a.id === attackId);
+
+  // Toggle expand/collapse
+  const toggleBtn = $("[data-action='toggle-deck']", deck);
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      state.slideDeckOpen = !state.slideDeckOpen;
+      const newDeck = renderSlideDeck(atk, isDefense);
+      deck.outerHTML = newDeck;
+      bindSlideDeck();
+    });
+  }
 
   // Nav buttons
   $$(".slide-deck__btn", deck).forEach((btn) => {
@@ -578,13 +631,12 @@ function renderAttackMode() {
   dom.main.innerHTML = `
     ${renderAttackDropdown()}
     ${renderSlideDeck(atk)}
-    <div class="attack-header fade-in">
-      <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)} \u00b7 ${escapeHtml(atk.owasp_name)}</div>
-      <h1 class="attack-header__title">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>
-      <p class="attack-header__desc">${escapeHtml(atk.description)}</p>
-      <div style="margin-top:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text-sec);">
-        <strong style="color:var(--purple);">Detection method:</strong> ${escapeHtml(detectionDescs[atk.success_criteria] || atk.success_criteria)}
+    <div class="attack-header fade-in" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)}</div>
+        <h1 class="attack-header__title" style="font-size:18px;margin:0;">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}${difficultyBadge(atk.id)}</h1>
       </div>
+      <div style="font-size:11px;color:var(--text-muted);background:var(--surface);padding:4px 10px;border-radius:var(--radius-xs);">${escapeHtml(detectionDescs[atk.success_criteria] || atk.success_criteria).split(" \u2014 ")[0]}</div>
     </div>
     <div class="form-group">
       <label for="user-prompt">${t("label_user_prompt", lang)}</label>
@@ -759,10 +811,9 @@ function renderDefendMode() {
   dom.main.innerHTML = `
     ${renderAttackDropdown()}
     ${renderSlideDeck(atk, true)}
-    <div class="attack-header fade-in">
-      <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)} \u00b7 ${escapeHtml(atk.owasp_name)}</div>
-      <h1 class="attack-header__title">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>
-      <p class="attack-header__desc">${escapeHtml(atk.description)}</p>
+    <div class="attack-header fade-in" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="attack-header__owasp">${escapeHtml(atk.owasp_id)}</div>
+      <h1 class="attack-header__title" style="font-size:18px;margin:0;">${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</h1>
     </div>
     <div class="form-group">
       <label>${t("label_select_defenses", lang)}</label>
@@ -1297,7 +1348,7 @@ function renderScorecardMode() {
   dom.main.innerHTML = `
     <div class="attack-header fade-in">
       <h1 class="attack-header__title">${t("mode_scorecard", lang)}</h1>
-      <p class="attack-header__desc">Run all ${state.attacks.length} attacks at once against the undefended model. This shows how many OWASP LLM Top 10 vulnerabilities succeed out of the box.</p>
+      <p class="attack-header__desc">${lang === "es" ? `Ejecuta los ${state.attacks.length} ataques contra el modelo sin defensa.` : `Run all ${state.attacks.length} attacks at once against the undefended model. See how many vulnerabilities succeed out of the box.`}</p>
     </div>
     <div class="form-group">
       <label for="sc-canary">${t("label_scorecard_canary", lang)}</label>
