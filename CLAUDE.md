@@ -8,15 +8,15 @@ llm-top-10-demo is an **interactive security workshop platform** for the OWASP L
 
 The system allows participants to:
 
-- Run 9 real attacks (11 sub-scenarios) against a live LLM
+- Run **25 real attacks** across 3 OWASP security standards against a live LLM
 - Toggle 5 defense tools to see what catches each attack
 - Write custom prompts and injection payloads
 - Score all attacks at once and see hit rates
 
-This is Part 1 of a workshop series by Nikolas Behar:
-- **Part 1:** OWASP LLM Top 10 (this repo)
-- **Part 2:** OWASP MCP Top 10 (mcp-injection-demo)
-- **Part 3:** OWASP Agentic AI Top Threats (future)
+**3 workshops in one platform** (selectable via hero pill selector):
+- **LLM Top 10 (2025):** 10 attacks (LLM01-LLM09) — prompt injection, data leakage, hallucination
+- **MCP Top 10:** 9 attacks (MCP01-MCP10) — tool response injection, secret exposure, command injection
+- **Agentic AI Top 10 (2026):** 6 attacks (ASI01-ASI09) — goal hijack, tool misuse, memory poisoning
 
 The repository — not conversation history — is the system of record.
 
@@ -25,12 +25,16 @@ The repository — not conversation history — is the system of record.
 # Repository Structure
 
 ```
-app.py              FastAPI application (routes, ATTACKS dict, model calls)
+app.py              FastAPI application (routes, LLM ATTACKS dict, model calls, multi-workshop routing)
+mcp_attacks.py      MCP attack scenarios (9 attacks, MCP-specific message builder)
+agentic_attacks.py  Agentic AI attack scenarios (6 attacks)
 scanner.py          Defense tools integration (Prompt Guard, LLM Guard, guardrail)
 static/css/         Stylesheets
-static/js/          Client-side app logic and i18n
+static/js/          Client-side app logic, i18n, OWASP descriptions
 templates/          Jinja2 HTML templates
-specs/              Feature and attack specifications
+specs/              Attack and infrastructure specifications
+specs/mcp/          MCP attack specs (9 files)
+specs/agentic/      Agentic AI attack specs (6 files)
 postman/            Postman collection (API testing contract)
 docs/               Project status and session tracking
 ```
@@ -268,20 +272,47 @@ Located in `/specs/`:
 
 ---------------------------------------------------------------------
 
-# The 9 Attacks (11 sub-scenarios)
+# The 25 Attacks (3 Workshops)
+
+## LLM Top 10 — 10 attacks
 
 | ID | Spec File | OWASP | Detection |
 |----|-----------|-------|-----------|
-| llm01a | `llm01a_direct_prompt_injection.md` | LLM01 | canary |
-| llm01b | `llm01b_indirect_prompt_injection.md` | LLM01 | canary |
-| llm02 | `llm02_sensitive_information_disclosure.md` | LLM02 | secret strings |
-| llm03 | `llm03_supply_chain.md` | LLM03 | canary |
-| llm04 | `llm04_data_and_model_poisoning.md` | LLM04 | canary |
-| llm05 | `llm05_improper_output_handling.md` | LLM05 | dangerous output patterns |
-| llm06 | `llm06_excessive_agency.md` | LLM06 | action patterns |
-| llm07 | `llm07_system_prompt_leakage.md` | LLM07 | secret strings |
-| llm08 | `llm08_vector_and_embedding_weaknesses.md` | LLM08 | canary |
-| llm09 | `llm09_misinformation.md` | LLM09 | hallucination patterns |
+| llm01a | `specs/llm01a_direct_prompt_injection.md` | LLM01 | canary |
+| llm01b | `specs/llm01b_indirect_prompt_injection.md` | LLM01 | canary |
+| llm02 | `specs/llm02_sensitive_information_disclosure.md` | LLM02 | secret strings |
+| llm03 | `specs/llm03_supply_chain.md` | LLM03 | canary |
+| llm04 | `specs/llm04_data_and_model_poisoning.md` | LLM04 | canary |
+| llm05 | `specs/llm05_improper_output_handling.md` | LLM05 | dangerous output patterns |
+| llm06 | `specs/llm06_excessive_agency.md` | LLM06 | action patterns |
+| llm07 | `specs/llm07_system_prompt_leakage.md` | LLM07 | secret strings |
+| llm08 | `specs/llm08_vector_and_embedding_weaknesses.md` | LLM08 | canary |
+| llm09 | `specs/llm09_misinformation.md` | LLM09 | hallucination patterns |
+
+## MCP Top 10 — 9 attacks
+
+| ID | Spec File | OWASP | Detection |
+|----|-----------|-------|-----------|
+| mcp06a | `specs/mcp/mcp06a_direct_override.md` | MCP06 | canary |
+| mcp06b | `specs/mcp/mcp06b_html_injection.md` | MCP06 | secret strings |
+| mcp06c | `specs/mcp/mcp06c_authority_spoof.md` | MCP06 | secret strings |
+| mcp06d | `specs/mcp/mcp06d_data_exfil.md` | MCP06 | secret strings |
+| mcp06e | `specs/mcp/mcp06e_emotional_manipulation.md` | MCP06 | secret strings |
+| mcp01 | `specs/mcp/mcp01_token_exposure.md` | MCP01 | canary |
+| mcp03 | `specs/mcp/mcp03_tool_poisoning.md` | MCP03 | canary |
+| mcp05 | `specs/mcp/mcp05_command_injection.md` | MCP05 | canary |
+| mcp10 | `specs/mcp/mcp10_context_oversharing.md` | MCP10 | canary |
+
+## Agentic AI Top 10 — 6 attacks
+
+| ID | Spec File | OWASP | Detection |
+|----|-----------|-------|-----------|
+| asi01 | `specs/agentic/asi01_agent_goal_hijack.md` | ASI01 | canary |
+| asi02 | `specs/agentic/asi02_tool_misuse.md` | ASI02 | action patterns |
+| asi03 | `specs/agentic/asi03_privilege_abuse.md` | ASI03 | action patterns |
+| asi05 | `specs/agentic/asi05_code_execution.md` | ASI05 | dangerous output patterns |
+| asi06 | `specs/agentic/asi06_memory_poisoning.md` | ASI06 | canary |
+| asi09 | `specs/agentic/asi09_trust_exploitation.md` | ASI09 | canary |
 
 ---------------------------------------------------------------------
 
