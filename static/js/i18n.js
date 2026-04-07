@@ -76,6 +76,7 @@ const TRANSLATIONS = {
     workshop_agentic: "Agentic AI",
 
     // Tabs
+    tab_info: "Info",
     tab_attack: "Attack",
     tab_defend: "Defense",
     tab_custom: "Custom Prompt",
@@ -166,6 +167,7 @@ const TRANSLATIONS = {
     workshop_agentic: "IA Ag\u00e9ntica",
 
     // Tabs
+    tab_info: "Info",
     tab_attack: "Ataque",
     tab_defend: "Defensa",
     tab_custom: "Prompt Personalizado",

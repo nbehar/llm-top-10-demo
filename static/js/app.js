@@ -37,7 +37,7 @@ const WORKSHOP_INFO = {
 const state = {
   lang: "en",
   workshop: "llm",         // llm | mcp | agentic
-  mode: "attack",          // attack | defend | custom | scorecard
+  mode: "info",            // info | attack | defend | custom | scorecard
   attacks: [],             // populated from /api/attacks
   selectedAttackId: null,
   attackResults: {},        // attack_id -> last result
@@ -94,6 +94,7 @@ function renderChrome() {
   });
   // Render tabs
   const tabDefs = [
+    { mode: "info", key: "tab_info" },
     { mode: "attack", key: "tab_attack" },
     { mode: "defend", key: "tab_defend" },
     { mode: "custom", key: "tab_custom" },
@@ -285,11 +286,102 @@ function selectAttack(id) {
 
 function renderMain() {
   switch (state.mode) {
+    case "info":    renderInfoMode(); break;
     case "attack":  renderAttackMode(); break;
     case "defend":  renderDefendMode(); break;
     case "custom":  renderCustomMode(); break;
     case "scorecard": renderScorecardMode(); break;
   }
+}
+
+// -- Info Mode --------------------------------------------------------------
+
+function renderInfoMode() {
+  const lang = state.lang;
+  const isEs = lang === "es";
+
+  dom.main.innerHTML = `
+    <div class="fade-in">
+      <h1 class="attack-header__title" style="margin-bottom:16px;">${isEs ? "Bienvenido al Taller de Seguridad IA" : "Welcome to the AI Security Workshop"}</h1>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card__header"><span class="card__title">${isEs ? "C\u00f3mo Funciona" : "How It Works"}</span></div>
+        <div class="card__text" style="line-height:1.8;">
+          <strong>1.</strong> ${isEs ? "Elige un taller" : "Pick a workshop"} \u2014 <code>LLM Top 10</code>, <code>MCP Top 10</code>, ${isEs ? "o" : "or"} <code>Agentic AI</code><br>
+          <strong>2.</strong> ${isEs ? "Selecciona un ataque del men\u00fa desplegable" : "Select an attack from the dropdown"}<br>
+          <strong>3.</strong> ${isEs ? "Lee las diapositivas educativas (expand\u00e9 'Aprende sobre este ataque')" : "Read the educational slides (expand 'Learn about this attack')"}<br>
+          <strong>4.</strong> ${isEs ? "Haz clic en" : "Click"} <strong>${isEs ? "Ejecutar Ataque" : "Run Attack"}</strong> ${isEs ? "y observa los resultados (Causa / Efecto / Impacto)" : "and see the results (Cause / Effect / Impact)"}<br>
+          <strong>5.</strong> ${isEs ? "Cambia a la pesta\u00f1a" : "Switch to the"} <strong>${isEs ? "Defensa" : "Defense"}</strong> ${isEs ? "tab, activa herramientas de defensa y vuelve a ejecutar" : "tab, enable defense tools, and run again"}<br>
+          <strong>6.</strong> ${isEs ? "Prueba" : "Try"} <strong>${isEs ? "Prompt Personalizado" : "Custom Prompt"}</strong> ${isEs ? "para escribir tus propios ataques" : "to write your own attacks"}<br>
+          <strong>7.</strong> ${isEs ? "Ejecuta el" : "Run the"} <strong>${isEs ? "Puntaje" : "Scorecard"}</strong> ${isEs ? "para probar todos los ataques a la vez" : "to test all attacks at once"}
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:rgba(59,130,246,0.06);border-left:3px solid var(--blue);border-radius:0 4px 4px 0;font-size:13px;">
+          <strong style="color:var(--blue);">${isEs ? "Frase Canaria:" : "Canary Phrase:"}</strong> ${isEs ? "Muchos ataques ocultan una frase secreta" : "Many attacks hide a secret phrase"} (<code>BANANA SUNDAE</code>) ${isEs ? "en el prompt. Si aparece en la respuesta del modelo, el ataque funcion\u00f3." : "in the prompt. If it appears in the model's response, the attack succeeded."}
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card__header"><span class="card__title">${isEs ? "Escenario: NexaCore Technologies" : "Scenario: NexaCore Technologies"}</span></div>
+        <div class="card__text">
+          ${isEs ? "Eres un empleado de" : "You are an employee at"} <strong>NexaCore Technologies</strong>, ${isEs ? "una empresa SaaS de ~800 personas. Todos los ataques usan sistemas internos ficticios pero realistas de NexaCore." : "a ~800-person SaaS company. All attacks use fictional but realistic NexaCore internal systems."}
+        </div>
+        <div style="margin-top:12px;font-size:13px;color:var(--text-sec);">
+          <strong>${isEs ? "Departamentos:" : "Departments:"}</strong> Engineering, IT, HR, Marketing, Sales, DevOps, Security<br>
+          <strong>${isEs ? "Empleados clave:" : "Key Employees:"}</strong> Marcus Webb (CEO), Sarah Chen (Engineer), John Smith (Eng. Manager), Alex Rivera (Marketing), Jake Torres (DevOps)
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card__header"><span class="card__title">${isEs ? "Infraestructura Simulada" : "Simulated Infrastructure"}</span></div>
+        <div style="font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--text-sec);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;overflow-x:auto;white-space:pre;">
+\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
+\u2502  NexaCore Technologies \u2014 Internal Systems       \u2502
+\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524
+\u2502  HR Portal       \u2502  Code Review    \u2502  IT Help Desk   \u2502
+\u2502  LLM01-02, LLM07 \u2502  LLM03          \u2502  MCP06          \u2502
+\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524
+\u2502  Knowledge Base  \u2502  DevOps Tools   \u2502  Customer       \u2502
+\u2502  LLM04, LLM08    \u2502  ASI02          \u2502  Support ASI06  \u2502
+\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524
+\u2502  AI PM Agent    \u2502  IT Service     \u2502  Security       \u2502
+\u2502  ASI01           \u2502  Desk ASI03     \u2502  Assistant ASI09\u2502
+\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524
+\u2502  PostgreSQL \u00b7 Redis \u00b7 K8s \u00b7 Groq API \u00b7 MCP Server  \u2502
+\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518</div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
+          <strong>${isEs ? "Datos confidenciales en juego:" : "Confidential data at stake:"}</strong>
+          ${isEs ? "Salario del CEO ($4.2M), adquisici\u00f3n \"Project Midnight\" ($340M), despidos pendientes (120), investigaci\u00f3n SEC, credenciales de BD, API keys, PII de empleados" : "CEO salary ($4.2M), acquisition \"Project Midnight\" ($340M), pending layoffs (120), SEC investigation, DB credentials, API keys, employee PII"}
+          <br><em>${isEs ? "Todo es ficticio \u2014 solo para fines educativos." : "All fictional \u2014 for educational purposes only."}</em>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card__header"><span class="card__title">${isEs ? "5 Herramientas de Defensa" : "5 Defense Tools"}</span></div>
+        <div style="font-size:13px;color:var(--text-sec);line-height:1.8;">
+          \ud83d\udee1 <strong>Meta Prompt Guard 2</strong> \u2014 ${isEs ? "Escanea entradas ANTES del modelo (clasificador de 86M par\u00e1metros)" : "Scans inputs BEFORE the model (86M parameter classifier)"}<br>
+          \ud83d\udcca <strong>LLM Guard \u2014 Output</strong> \u2014 ${isEs ? "Escanea respuestas DESPU\u00c9S del modelo (credenciales, PII, c\u00f3digo)" : "Scans responses AFTER the model (credentials, PII, code)"}<br>
+          \ud83d\udcc4 <strong>LLM Guard \u2014 Context</strong> \u2014 ${isEs ? "Escanea documentos RAG ANTES de inyecci\u00f3n en contexto" : "Scans RAG documents BEFORE context injection"}<br>
+          \ud83d\udd12 <strong>System Prompt Hardening</strong> \u2014 ${isEs ? "Etiquetas XML de l\u00edmite + 5 reglas de rechazo (gratis, sin librer\u00eda)" : "XML boundary tags + 5 refusal rules (free, no library)"}<br>
+          \ud83e\udd16 <strong>Guardrail Model</strong> \u2014 ${isEs ? "Segunda llamada LLM eval\u00faa la respuesta (+1 llamada API)" : "Second LLM call evaluates the response (+1 API call)"}
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:24px;">
+        <button class="btn btn--primary" style="max-width:400px;" id="btn-start-tour">
+          \ud83d\ude80 ${isEs ? "Comenzar el Taller" : "Start the Workshop"}
+        </button>
+      </div>
+    </div>`;
+
+  // Start tour button
+  $("#btn-start-tour")?.addEventListener("click", () => {
+    state.mode = "attack";
+    if (!state.selectedAttackId && state.attacks.length > 0) {
+      state.selectedAttackId = state.attacks[0].id;
+    }
+    renderChrome();
+    renderMain();
+  });
 }
 
 // -- OWASP Vulnerability Descriptions (from genai.owasp.org) ---------------
@@ -770,9 +862,9 @@ function renderAttackResult(r) {
       <div class="${verdictClass}">${verdictIcon} ${verdictText}</div>
       <div class="card__text" style="margin-top:8px;">${escapeHtml(impact.consequence || "")}</div>
       ${impact.attack_type ? `<div class="card__text" style="color:var(--text-muted);font-size:12px;">${escapeHtml(impact.attack_type)}</div>` : ""}
-      ${isSucceeded ? `<div style="margin-top:12px;padding:10px 14px;background:rgba(59,130,246,0.06);border-left:3px solid var(--blue);border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:13px;color:var(--text-sec);">
-        <strong style="color:var(--blue);">Try the defense:</strong> Switch to <strong>Defense Lab</strong> mode, select defense tools, and run this same attack to see which tools catch it.
-      </div>` : ""}
+      ${isSucceeded ? `<button class="btn btn--primary" style="margin-top:16px;background:var(--green);" data-action="try-defense">
+        \ud83d\udee1\ufe0f ${lang === "es" ? "Probar con Defensa" : "Try with Defense"}
+      </button>` : ""}
     </div>
 
     <div class="collapsible" id="full-prompt-collapsible">
@@ -804,9 +896,17 @@ async function handleRunAttack(atk) {
     alert(err.message || t("error_generic", state.lang));
   } finally {
     state.running = false;
-    // sidebar removed — tabs + dropdown layout
     renderMain();
     bindCollapsibles();
+    // Bind "Try with Defense" button
+    const tryDefBtn = $("[data-action='try-defense']");
+    if (tryDefBtn) {
+      tryDefBtn.addEventListener("click", () => {
+        state.mode = "defend";
+        renderChrome();
+        renderMain();
+      });
+    }
   }
 }
 
