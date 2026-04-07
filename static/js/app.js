@@ -46,7 +46,7 @@ const state = {
   scorecardRunning: false,
   scorecardProgress: { completed: 0, total: 0 },
   selectedDefenses: [],     // defense IDs selected in Defense Lab
-  lastDefendResult: null,   // last /api/defend response
+  defendResults: {},        // attack_id -> last /api/defend response
   slideIndex: {},           // attack_id -> current slide index
   slideDeckOpen: false,     // whether slide deck is expanded
 };
@@ -81,12 +81,14 @@ function renderChrome() {
       state.workshop = btn.dataset.workshop;
       state.selectedAttackId = null;
       state.attackResults = {};
-      state.lastDefendResult = null;
+      state.defendResults = {};
       state.scorecardResults = null;
       updateHero();
+      renderChrome();
+      // Show loading state
+      dom.main.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text-muted);gap:10px;"><span class="spinner"></span> Loading attacks\u2026</div>';
       await loadAttacks();
       if (state.attacks.length > 0) state.selectedAttackId = state.attacks[0].id;
-      renderChrome();
       renderMain();
     });
   });
@@ -875,9 +877,9 @@ function renderDefendMode() {
   });
 
   // Show last result if we have one
-  if (state.lastDefendResult && state.lastDefendResult.attack_id === atk.id) {
+  if (state.defendResults[atk.id]) {
     const area = $("#defend-results");
-    if (area) area.innerHTML = renderDefendResult(state.lastDefendResult);
+    if (area) area.innerHTML = renderDefendResult(state.defendResults[atk.id]);
   }
 
   // Bind run
@@ -893,12 +895,11 @@ function renderDefendMode() {
     const canary = $("#canary-d")?.value || "BANANA SUNDAE";
 
     state.running = true;
-    state.lastDefendResult = null;
     renderDefendMode();
 
     try {
       const result = await runDefend(atk.id, userPrompt, canary, state.selectedDefenses);
-      state.lastDefendResult = result;
+      state.defendResults[atk.id] = result;
       state.running = false;
       renderDefendMode();
     } catch (err) {
