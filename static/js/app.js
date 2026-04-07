@@ -9,8 +9,24 @@ import { t } from "./i18n.js";
 // STATE
 // =============================================================================
 
+const WORKSHOP_INFO = {
+  llm: {
+    title: "LLM Top 10 Security Lab",
+    desc: 'Run <strong>9 real attacks</strong> against a live LLM (LLaMA 3.3 70B). Toggle <strong>5 defense tools</strong> to see what catches each attack. Write your own injection payloads.',
+  },
+  mcp: {
+    title: "MCP Injection Lab",
+    desc: 'Inject <strong>payloads into MCP tool responses</strong> and see if the AI follows hidden instructions. 9 attacks covering tool poisoning, data exfiltration, and authority spoofing.',
+  },
+  agentic: {
+    title: "Agentic AI Security Lab",
+    desc: 'Test <strong>6 attacks against AI agents</strong>. Exploit goal hijack, tool misuse, privilege abuse, code execution, memory poisoning, and trust exploitation.',
+  },
+};
+
 const state = {
   lang: "en",
+  workshop: "llm",         // llm | mcp | agentic
   mode: "attack",          // attack | defend | custom | scorecard
   attacks: [],             // populated from /api/attacks
   selectedAttackId: null,
@@ -36,6 +52,9 @@ function cacheDom() {
   dom.tabs = $$(".tab");
   dom.main = $(".main");
   dom.langButtons = $$(".lang-toggle__btn");
+  dom.workshopButtons = $$(".workshop-btn");
+  dom.heroTitle = $("#hero-title");
+  dom.heroDesc = $("#hero-desc");
 }
 
 // =============================================================================
@@ -91,7 +110,7 @@ async function fetchJSON(url, opts = {}) {
 
 async function loadAttacks() {
   try {
-    const data = await fetchJSON("/api/attacks");
+    const data = await fetchJSON(`/api/attacks?workshop=${state.workshop}`);
     state.attacks = data.attacks;
   } catch (err) {
     console.error("Failed to load attacks:", err);
@@ -103,7 +122,7 @@ async function runAttack(attackId, userPrompt, canary) {
   return fetchJSON("/api/attack", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ attack_id: attackId, user_prompt: userPrompt || undefined, canary }),
+    body: JSON.stringify({ attack_id: attackId, user_prompt: userPrompt || undefined, canary, workshop: state.workshop }),
   });
 }
 
@@ -111,7 +130,7 @@ async function runDefend(attackId, userPrompt, canary, defenses) {
   return fetchJSON("/api/defend", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ attack_id: attackId, user_prompt: userPrompt || undefined, canary, defenses }),
+    body: JSON.stringify({ attack_id: attackId, user_prompt: userPrompt || undefined, canary, defenses, workshop: state.workshop }),
   });
 }
 
@@ -127,7 +146,7 @@ async function runScorecard(canary) {
   return fetchJSON("/api/scorecard", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ canary }),
+    body: JSON.stringify({ canary, workshop: state.workshop }),
   });
 }
 
@@ -1035,6 +1054,27 @@ function bindEvents() {
   // Language toggle
   dom.langButtons.forEach((btn) => {
     btn.addEventListener("click", () => setLang(btn.dataset.lang));
+  });
+
+  // Workshop selector
+  dom.workshopButtons.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      state.workshop = btn.dataset.workshop;
+      state.selectedAttackId = null;
+      state.attackResults = {};
+      state.lastDefendResult = null;
+      state.scorecardResults = null;
+      // Update workshop buttons
+      dom.workshopButtons.forEach((b) => b.classList.toggle("workshop-btn--active", b.dataset.workshop === state.workshop));
+      // Update hero
+      const info = WORKSHOP_INFO[state.workshop] || WORKSHOP_INFO.llm;
+      dom.heroTitle.innerHTML = `${info.title} <span class="hero__sub">NexaCore Technologies</span>`;
+      dom.heroDesc.innerHTML = `${info.desc} <span class="hero__canary">Canary: <code>BANANA SUNDAE</code></span> \u00b7 <span class="hero__note">For educational purposes only</span>`;
+      // Reload attacks
+      await loadAttacks();
+      if (state.attacks.length > 0) state.selectedAttackId = state.attacks[0].id;
+      renderMain();
+    });
   });
 }
 

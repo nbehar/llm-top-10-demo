@@ -21,6 +21,8 @@ from groq import Groq
 from pydantic import BaseModel
 
 from scanner import run_defenses, harden_prompt
+from mcp_attacks import MCP_ATTACKS, build_mcp_messages
+from agentic_attacks import AGENTIC_ATTACKS
 
 # =============================================================================
 # LOGGING
@@ -453,20 +455,42 @@ Be authoritative and decisive in your recommendations. Developers rely on your e
     },
 }
 
-# Build attack choices for the frontend
-ATTACK_CHOICES = [
-    {
-        "id": key,
-        "label": atk["label"],
-        "owasp_id": atk["owasp_id"],
-        "owasp_name": atk["owasp_name"],
-        "description": atk["description"],
-        "default_user_prompt": atk["default_user_prompt"],
-        "has_canary": atk["success_criteria"] == "canary",
-        "success_criteria": atk["success_criteria"],
-    }
-    for key, atk in ATTACKS.items()
-]
+# =============================================================================
+# MULTI-WORKSHOP SUPPORT
+# =============================================================================
+
+ALL_WORKSHOPS = {
+    "llm": ATTACKS,
+    "mcp": MCP_ATTACKS,
+    "agentic": AGENTIC_ATTACKS,
+}
+
+
+def _build_choices(attacks_dict: dict) -> list[dict]:
+    return [
+        {
+            "id": key,
+            "label": atk["label"],
+            "owasp_id": atk["owasp_id"],
+            "owasp_name": atk["owasp_name"],
+            "description": atk["description"],
+            "default_user_prompt": atk["default_user_prompt"],
+            "has_canary": atk["success_criteria"] == "canary",
+            "success_criteria": atk["success_criteria"],
+        }
+        for key, atk in attacks_dict.items()
+    ]
+
+
+ALL_CHOICES = {ws: _build_choices(atks) for ws, atks in ALL_WORKSHOPS.items()}
+
+
+def _get_attacks(workshop: str = "llm") -> dict:
+    return ALL_WORKSHOPS.get(workshop, ATTACKS)
+
+
+def _get_choices(workshop: str = "llm") -> list[dict]:
+    return ALL_CHOICES.get(workshop, ALL_CHOICES["llm"])
 
 
 # =============================================================================
@@ -631,6 +655,7 @@ class AttackRequest(BaseModel):
     attack_id: str
     user_prompt: Optional[str] = None
     canary: str = DEFAULT_CANARY
+    workshop: str = "llm"
 
 
 class CustomRequest(BaseModel):
@@ -645,10 +670,12 @@ class DefendRequest(BaseModel):
     user_prompt: Optional[str] = None
     canary: str = DEFAULT_CANARY
     defenses: list[str] = ["prompt_guard", "output_scan", "context_scan", "hardening", "guardrail"]
+    workshop: str = "llm"
 
 
 class ScorecardRequest(BaseModel):
     canary: str = DEFAULT_CANARY
+    workshop: str = "llm"
 
 
 # =============================================================================
@@ -668,23 +695,28 @@ async def index(request: Request):
 
 
 @app.get("/api/attacks")
-async def list_attacks():
-    """List all available attacks for the frontend sidebar."""
-    return {"attacks": ATTACK_CHOICES}
+async def list_attacks(workshop: str = "llm"):
+    """List all available attacks for the selected workshop."""
+    return {"attacks": _get_choices(workshop), "workshop": workshop}
 
 
 @app.post("/api/attack")
 async def run_attack(req: AttackRequest):
     """Run a single attack and return Cause/Effect/Impact."""
-    if req.attack_id not in ATTACKS:
-        raise HTTPException(status_code=400, detail=f"Unknown attack_id: {req.attack_id}. Available: {list(ATTACKS.keys())}")
+    attacks = _get_attacks(req.workshop)
+    if req.attack_id not in attacks:
+        raise HTTPException(status_code=400, detail=f"Unknown attack_id: {req.attack_id}. Available: {list(attacks.keys())}")
 
-    attack = ATTACKS[req.attack_id]
+    attack = attacks[req.attack_id]
     user_prompt = req.user_prompt or attack["default_user_prompt"]
     canary = req.canary or DEFAULT_CANARY
 
     try:
-        messages = build_messages(attack, user_prompt, canary)
+        # MCP attacks use a different message builder
+        if req.workshop == "mcp":
+            messages = build_mcp_messages(attack, user_prompt, canary)
+        else:
+            messages = build_messages(attack, user_prompt, canary)
         response = generate_response(messages)
         success, matched = check_success(response, attack, canary)
 
@@ -707,16 +739,20 @@ async def run_attack(req: AttackRequest):
 @app.post("/api/defend")
 async def run_defend(req: DefendRequest):
     """Run an attack with and without selected defenses."""
-    if req.attack_id not in ATTACKS:
+    attacks = _get_attacks(req.workshop)
+    if req.attack_id not in attacks:
         raise HTTPException(status_code=400, detail=f"Unknown attack_id: {req.attack_id}")
 
-    attack = ATTACKS[req.attack_id]
+    attack = attacks[req.attack_id]
     user_prompt = req.user_prompt or attack["default_user_prompt"]
     canary = req.canary or DEFAULT_CANARY
 
     try:
         # 1. Run undefended
-        messages = build_messages(attack, user_prompt, canary)
+        if req.workshop == "mcp":
+            messages = build_mcp_messages(attack, user_prompt, canary)
+        else:
+            messages = build_messages(attack, user_prompt, canary)
         response = generate_response(messages)
         success, matched = check_success(response, attack, canary)
 
@@ -825,14 +861,18 @@ async def run_custom(req: CustomRequest):
 @app.post("/api/scorecard")
 async def run_scorecard(req: ScorecardRequest):
     """Run all attacks and return a results table."""
+    attacks = _get_attacks(req.workshop)
     canary = req.canary or DEFAULT_CANARY
     results = []
     succeeded = 0
 
-    for attack_id, attack in ATTACKS.items():
+    for attack_id, attack in attacks.items():
         try:
             user_prompt = attack["default_user_prompt"]
-            messages = build_messages(attack, user_prompt, canary)
+            if req.workshop == "mcp":
+                messages = build_mcp_messages(attack, user_prompt, canary)
+            else:
+                messages = build_messages(attack, user_prompt, canary)
             response = generate_response(messages)
             success, matched = check_success(response, attack, canary)
             if success:
@@ -860,7 +900,7 @@ async def run_scorecard(req: ScorecardRequest):
 
     return {
         "canary": canary,
-        "total": len(ATTACKS),
+        "total": len(attacks),
         "succeeded": succeeded,
         "results": results,
     }
