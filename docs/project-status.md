@@ -1,6 +1,6 @@
 # Project Status — OWASP AI Security Workshop Platform
 
-*Last updated: 2026-04-07 (Session 4)*
+*Last updated: 2026-04-07 (Session 5)*
 
 ---------------------------------------------------------------------
 
@@ -210,3 +210,25 @@ Single HuggingFace Space serving 3 OWASP security workshops:
 - **MCP message format:** Single user message with embedded tool response (matches original Gradio app)
 - **Agentic scope:** 6 of 10 ASI risks (skipped ASI04/07/08/10 — hard to demo without multi-agent infrastructure)
 - **Subtitle:** "Prof. Nikolas Behar" instead of "OWASP"
+
+### Session 5 — 2026-04-07
+
+**What was accomplished:**
+
+1. ES translations: tabs, workshop pills, slide titles, detection methods, hero content — all switch to Spanish
+2. Tabs + workshop pills rendered from JS (not hardcoded HTML) for i18n support
+3. SSE scorecard streaming: real-time progress via EventSource, partial results render as attacks complete
+4. Postman collection: added /api/defend, workshop param, SSE stream endpoint
+5. Defense matrix verified for MCP (Out 8/9, Hard 9/9) and Agentic (Out 6/6, Guard 4/6)
+6. Educational slide deck: 4 slides per attack from OWASP cheat sheets (desc, examples, demo context, prevention)
+7. slides.js: 317 lines of rich content for all 20 OWASP IDs
+8. Defense-specific slides: different from Attack slides — defense overview, recommended setup, prevention
+9. DEFENSE_MATRIX: per-attack effectiveness data for all 25 attacks (catches/misses/recommended/tip)
+10. Custom canary bug fixed (read form values before re-render)
+11. ML Top 10 evaluated and skipped (only 2-3 demoable via API, overlaps with LLM Top 10)
+12. GitHub issue #2 updated with slide improvement progress
+
+**Key decisions:**
+- **ML Top 10 skipped:** Most risks need training pipeline access, demoable ones overlap with LLM Top 10
+- **Slide content:** Generated dynamically from OWASP_SLIDES + DEFENSE_MATRIX, not hardcoded per attack
+- **Defense slides:** Separate from attack slides — show effectiveness matrix, recommended toggles, tactical tips
