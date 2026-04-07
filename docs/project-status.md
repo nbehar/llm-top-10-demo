@@ -48,7 +48,7 @@
 | Guardrail model logic | `scanner.py` | ✅ Done (second Groq call) |
 | HTML template | `templates/index.html` | ✅ Done |
 | CSS dark theme | `static/css/styles.css` | ✅ Done |
-| JS app logic (sidebar, forms, results) | `static/js/app.js` | ✅ Done |
+| JS app logic (tabs, dropdown, forms, results) | `static/js/app.js` | ✅ Done |
 | JS i18n (EN/ES) | `static/js/i18n.js` | ✅ Done |
 | HF Spaces deployment | `nikobehar/llm-top-10` | ✅ Live |
 | CLAUDE.md | `CLAUDE.md` | ✅ Done (with Postman sync rules) |

@@ -58,7 +58,8 @@ docs/               Project status and session tracking
 
 ## Frontend Responsibilities
 
-- Sidebar navigation: attack list + mode selector
+- Horizontal tabs: Attack / Defense / Custom Prompt / Scorecard
+- Attack dropdown: select element for choosing attacks
 - Attack form: user prompt, canary phrase, run button
 - Result panels: Cause / Effect / Impact (vertical scroll)
 - Defense toggles: 5 selectable defense tools
@@ -444,12 +445,12 @@ If uncertain about model behavior → test with Groq API first.
 # Frontend Rules
 
 - Dark theme (`#0a0a0b` background, `#141416` surfaces)
-- Sidebar (260px) + main panel layout
+- Hero header + horizontal tabs + single-column layout (max-width 900px)
 - No frontend frameworks (vanilla HTML/CSS/JS)
 - All API calls via `fetch()`
 - State managed in JS objects, not in DOM
 - EN/ES translations in `static/js/i18n.js`
-- Mobile responsive: sidebar collapses below 768px
+- Mobile responsive: tabs scroll horizontally below 768px
 
 Visual spec in `specs/frontend_spec.md`.
 
@@ -468,7 +469,7 @@ Model output: escape all HTML before rendering — never use `innerHTML` with mo
 ## Accessibility
 
 - All interactive elements keyboard-navigable
-- Sidebar items focusable with Enter/Space to select
+- Tab buttons and dropdown focusable with keyboard
 - ARIA labels on icon-only buttons
 - Color is never the ONLY indicator — use icons (✅/🚨) alongside green/red
 - Font sizes minimum 14px body, 12px captions
@@ -507,7 +508,7 @@ Before deploying, verify:
 4. Scorecard runs all attacks with real-time progress
 5. EN/ES toggle switches all UI text
 6. Custom Prompt mode works with arbitrary inputs
-7. Mobile layout: sidebar collapses, panels stack
+7. Mobile layout: tabs scroll, panels stack
 
 Successful API response ≠ successful feature.
 

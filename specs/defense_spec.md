@@ -10,8 +10,8 @@ Participants select one or more defense tools from a panel, then run any attack 
 
 ### 1. Input Scanner — Meta Prompt Guard 2
 
-**Real tool:** [meta-llama/Prompt-Guard-86M](https://huggingface.co/meta-llama/Prompt-Guard-86M)
-**Install:** `pip install transformers torch`
+**Real tool:** [meta-llama/Llama-Prompt-Guard-2-86M](https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-86M)
+**Install:** `pip install transformers torch` (requires HF_TOKEN for gated model access)
 **Size:** 86M parameters, runs on CPU
 
 **What it is:** A DeBERTa-based classifier trained by Meta specifically to detect prompt injection and jailbreak attempts in user inputs. Part of Meta's LlamaFirewall framework. Trained on a large corpus of known injection techniques.
@@ -33,12 +33,13 @@ from transformers import pipeline
 
 classifier = pipeline(
     "text-classification",
-    model="meta-llama/Prompt-Guard-86M",
+    model="meta-llama/Llama-Prompt-Guard-2-86M",
     device=-1,  # CPU
+    token=os.environ.get("HF_TOKEN"),
 )
 
 result = classifier(user_prompt)
-# Returns: [{"label": "INJECTION", "score": 0.94}]
+# v2 returns: [{"label": "LABEL_1", "score": 0.94}]  (LABEL_0=benign, LABEL_1=malicious)
 ```
 
 **UI display when triggered:**
@@ -98,7 +99,7 @@ sensitive_scanner = Sensitive(
 sanitized_output, is_valid, risk_score = sensitive_scanner.scan(prompt, model_output)
 
 # Code vulnerability detection
-code_scanner = BanCode(languages=["python", "javascript", "sql"])
+code_scanner = BanCode(threshold=0.7)
 sanitized_output, is_valid, risk_score = code_scanner.scan(prompt, model_output)
 ```
 
@@ -324,7 +325,7 @@ Cost: +1 API call (~0.2s latency, ~$0.001)
 
 ---
 
-## Defense UI — Sidebar Toggle Panel
+## Defense UI — Toggle Panel
 
 In Defense Mode, the sidebar shows toggleable defenses with real tool names:
 

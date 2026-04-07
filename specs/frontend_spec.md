@@ -342,8 +342,9 @@ Progress bar updates in real time as each attack completes.
 
 ## Mobile Responsive
 
-- Below 768px: sidebar collapses to a hamburger menu
-- Main panel becomes full-width
+- Below 768px: tabs scroll horizontally, content is full-width
+- Hero header compact (smaller title, subtitle wraps)
+- Defense toggles stack vertically
 - Result panels stack vertically (already do)
 - Form inputs become full-width
 
@@ -351,7 +352,7 @@ Progress bar updates in real time as each attack completes.
 
 ## Animations / Transitions
 
-- Sidebar item selection: 150ms background transition
+- Tab selection: instant (no transition needed)
 - Result panels: fade-in 200ms when results arrive
 - Loading skeletons: subtle pulse animation
 - Collapsible sections: 200ms slide-down
