@@ -254,12 +254,17 @@ function renderAttackDropdown() {
   const options = state.attacks
     .map((atk) => `<option value="${atk.id}" ${atk.id === state.selectedAttackId ? "selected" : ""}>${escapeHtml(atk.owasp_id)}${atk.id.startsWith("llm01b") ? "b" : atk.id.startsWith("llm01a") ? "a" : ""} \u2014 ${escapeHtml(atk.label.replace(/ \(LLM\d+\)/, ""))}</option>`)
     .join("");
+  const isEs = state.lang === "es";
+  const diffHint = isEs
+    ? "Los ataques est\u00e1n ordenados por dificultad \u2014 empieza desde arriba. Los nombres siguen la nomenclatura est\u00e1ndar OWASP en ingl\u00e9s."
+    : "Attacks are ordered by difficulty \u2014 start from the top and work down.";
   return `
     <div class="form-group">
       <label>${t("label_select_attack", state.lang) || "Select an attack"}</label>
       <select class="attack-select" id="attack-select">
         ${options}
       </select>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${diffHint}</div>
     </div>`;
 }
 
@@ -310,7 +315,10 @@ function renderInfoMode() {
           <strong>${isEs ? "LLM (Large Language Model)" : "LLM (Large Language Model)"}</strong> \u2014 ${isEs ? "Modelos de IA como ChatGPT/LLaMA que procesan texto. LLaMA 3.3 70B es un modelo open-source de Meta con 70 mil millones de par\u00e1metros." : "AI models like ChatGPT/LLaMA that process text. LLaMA 3.3 70B is Meta's open-source model with 70 billion parameters. This workshop runs attacks against it live."}<br><br>
           <strong>${isEs ? "MCP (Model Context Protocol)" : "MCP (Model Context Protocol)"}</strong> \u2014 ${isEs ? "Est\u00e1ndar para conectar IA a herramientas externas (bases de datos, APIs, archivos). Los ataques MCP inyectan instrucciones maliciosas a trav\u00e9s de respuestas de herramientas \u2014 como atacar una app web a trav\u00e9s de su API backend." : "A standard for connecting AI to external tools (databases, APIs, file systems). MCP attacks inject malicious instructions through tool responses \u2014 the AI trusts them because they come from a 'trusted' source. Like attacking a web app through its backend API."}<br><br>
           <strong>${isEs ? "IA Ag\u00e9ntica" : "Agentic AI"}</strong> \u2014 ${isEs ? "Sistemas de IA que toman acciones aut\u00f3nomamente (ejecutar c\u00f3digo, llamar APIs, enviar correos). A diferencia de un chatbot, un agente HACE cosas \u2014 un agente comprometido puede eliminar archivos o exfiltrar datos." : "AI systems that take actions autonomously (run code, call APIs, send emails). Unlike a chatbot that just responds, an agent DOES things. A compromised agent can delete files, exfiltrate data, or execute code."}<br><br>
-          <strong>${isEs ? "3 Est\u00e1ndares OWASP" : "3 OWASP Standards"}</strong> \u2014 ${isEs ? "LLM Top 10 = riesgos del procesamiento de texto. MCP Top 10 = riesgos de conexiones a herramientas. Agentic AI Top 10 = riesgos de IA aut\u00f3noma. Cada uno aborda una superficie de ataque diferente." : "LLM Top 10 = risks from text processing (injection, leakage). MCP Top 10 = risks from tool integrations (poisoning, exfiltration). Agentic AI Top 10 = risks from autonomous actions (hijack, privilege abuse). Each addresses a different attack surface."}
+          <strong>${isEs ? "3 Est\u00e1ndares OWASP" : "3 OWASP Standards"}</strong> \u2014 ${isEs ? "LLM Top 10 = riesgos del procesamiento de texto. MCP Top 10 = riesgos de conexiones a herramientas. Agentic AI Top 10 = riesgos de IA aut\u00f3noma. Cada uno aborda una superficie de ataque diferente." : "LLM Top 10 = risks from text processing (injection, leakage). MCP Top 10 = risks from tool integrations (poisoning, exfiltration). Agentic AI Top 10 = risks from autonomous actions (hijack, privilege abuse). Each addresses a different attack surface."}<br><br>
+          <strong>${isEs ? "System Prompt (Prompt del Sistema)" : "System Prompt"}</strong> \u2014 ${isEs ? "Instrucciones ocultas que el desarrollador da a la IA antes de que el usuario interact\u00fae. Define el rol de la IA, sus l\u00edmites y datos confidenciales. Los usuarios no lo ven, pero los atacantes intentan extraerlo o anularlo. Piensa en ello como la configuraci\u00f3n del servidor que no deber\u00eda ser p\u00fablica." : "Hidden instructions the developer gives the AI before the user interacts. It defines the AI's role, boundaries, and confidential data. Users never see it, but attackers try to extract or override it. Think of it like server configuration that shouldn't be public-facing."}<br><br>
+          <strong>${isEs ? "RAG (Generaci\u00f3n Aumentada por Recuperaci\u00f3n)" : "RAG (Retrieval-Augmented Generation)"}</strong> \u2014 ${isEs ? "T\u00e9cnica donde la IA busca documentos relevantes antes de responder (como un empleado consultando una wiki interna). Los atacantes pueden envenenar esos documentos con instrucciones ocultas que la IA sigue ciegamente." : "A technique where the AI retrieves relevant documents before answering (like an employee checking an internal wiki). Attackers can poison those documents with hidden instructions the AI blindly follows."}<br><br>
+          <strong>${isEs ? "Canario (Honeytoken)" : "Canary (Honeytoken)"}</strong> \u2014 ${isEs ? "Una frase secreta plantada como trampa. Llamada as\u00ed por el 'canario en la mina de carb\u00f3n' \u2014 un marcador oculto que revela cu\u00e1ndo se ha cruzado un l\u00edmite. En este taller, si la IA dice la frase canaria, significa que el ataque logr\u00f3 que la IA desobedeciera sus instrucciones." : "A secret phrase planted as a tripwire. Named after the 'canary in a coal mine' \u2014 a hidden marker that reveals when a boundary has been crossed. In this workshop, if the AI says the canary phrase, it means the attack got the AI to disobey its instructions."}
         </div>
       </div>
 
@@ -1268,6 +1276,9 @@ function renderDefendResult(r) {
       <div class="${defClass}" style="margin-bottom:8px;">${defIcon} ${defText}</div>
       <div style="font-size:13px;color:var(--text-sec);margin-bottom:8px;">${r.any_detected ? "Defenses detected issues. The model was re-run with hardened prompt:" : "No defenses triggered. Output is unchanged:"}</div>
       <div class="model-output" style="max-height:200px;overflow-y:auto;">${escapeHtml(r.defended?.model_output || "")}</div>
+      ${r.any_detected && r.defended?.success ? `<div style="margin-top:12px;padding:10px 14px;background:rgba(251,191,36,0.06);border-left:3px solid var(--yellow, #fbbf24);border-radius:0 4px 4px 0;font-size:12px;line-height:1.6;">
+        <strong style="color:var(--yellow, #fbbf24);">Detection \u2260 Prevention:</strong> The defense tools above <em>detected</em> the attack (like a WAF in alert-only mode), but detection alone doesn't stop it. To actually <em>block</em> the attack, the system would need to reject the request or redact the output before it reaches the user. In production, you configure tools to block \u2014 not just log. This is the difference between an IDS (detects) and an IPS (prevents).
+      </div>` : ""}
     </div>`;
 }
 
