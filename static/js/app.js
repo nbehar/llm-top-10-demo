@@ -305,6 +305,16 @@ function renderInfoMode() {
       <h1 class="attack-header__title" style="margin-bottom:16px;">${isEs ? "Bienvenido al Taller de Seguridad IA" : "Welcome to the AI Security Workshop"}</h1>
 
       <div class="card" style="margin-bottom:16px;">
+        <div class="card__header"><span class="card__title">${isEs ? "Conceptos Clave" : "Key Concepts"}</span></div>
+        <div class="card__text" style="line-height:1.8;">
+          <strong>${isEs ? "LLM (Large Language Model)" : "LLM (Large Language Model)"}</strong> \u2014 ${isEs ? "Modelos de IA como ChatGPT/LLaMA que procesan texto. LLaMA 3.3 70B es un modelo open-source de Meta con 70 mil millones de par\u00e1metros." : "AI models like ChatGPT/LLaMA that process text. LLaMA 3.3 70B is Meta's open-source model with 70 billion parameters. This workshop runs attacks against it live."}<br><br>
+          <strong>${isEs ? "MCP (Model Context Protocol)" : "MCP (Model Context Protocol)"}</strong> \u2014 ${isEs ? "Est\u00e1ndar para conectar IA a herramientas externas (bases de datos, APIs, archivos). Los ataques MCP inyectan instrucciones maliciosas a trav\u00e9s de respuestas de herramientas \u2014 como atacar una app web a trav\u00e9s de su API backend." : "A standard for connecting AI to external tools (databases, APIs, file systems). MCP attacks inject malicious instructions through tool responses \u2014 the AI trusts them because they come from a 'trusted' source. Like attacking a web app through its backend API."}<br><br>
+          <strong>${isEs ? "IA Ag\u00e9ntica" : "Agentic AI"}</strong> \u2014 ${isEs ? "Sistemas de IA que toman acciones aut\u00f3nomamente (ejecutar c\u00f3digo, llamar APIs, enviar correos). A diferencia de un chatbot, un agente HACE cosas \u2014 un agente comprometido puede eliminar archivos o exfiltrar datos." : "AI systems that take actions autonomously (run code, call APIs, send emails). Unlike a chatbot that just responds, an agent DOES things. A compromised agent can delete files, exfiltrate data, or execute code."}<br><br>
+          <strong>${isEs ? "3 Est\u00e1ndares OWASP" : "3 OWASP Standards"}</strong> \u2014 ${isEs ? "LLM Top 10 = riesgos del procesamiento de texto. MCP Top 10 = riesgos de conexiones a herramientas. Agentic AI Top 10 = riesgos de IA aut\u00f3noma. Cada uno aborda una superficie de ataque diferente." : "LLM Top 10 = risks from text processing (injection, leakage). MCP Top 10 = risks from tool integrations (poisoning, exfiltration). Agentic AI Top 10 = risks from autonomous actions (hijack, privilege abuse). Each addresses a different attack surface."}
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
         <div class="card__header"><span class="card__title">${isEs ? "C\u00f3mo Funciona" : "How It Works"}</span></div>
         <div class="card__text" style="line-height:1.8;">
           <strong>1.</strong> ${isEs ? "Elige un taller" : "Pick a workshop"} \u2014 <code>LLM Top 10</code>, <code>MCP Top 10</code>, ${isEs ? "o" : "or"} <code>Agentic AI</code><br>
@@ -358,11 +368,11 @@ function renderInfoMode() {
       <div class="card" style="margin-bottom:16px;">
         <div class="card__header"><span class="card__title">${isEs ? "5 Herramientas de Defensa" : "5 Defense Tools"}</span></div>
         <div style="font-size:13px;color:var(--text-sec);line-height:1.8;">
-          \ud83d\udee1 <strong>Meta Prompt Guard 2</strong> \u2014 ${isEs ? "Escanea entradas ANTES del modelo (clasificador de 86M par\u00e1metros)" : "Scans inputs BEFORE the model (86M parameter classifier)"}<br>
-          \ud83d\udcca <strong>LLM Guard \u2014 Output</strong> \u2014 ${isEs ? "Escanea respuestas DESPU\u00c9S del modelo (credenciales, PII, c\u00f3digo)" : "Scans responses AFTER the model (credentials, PII, code)"}<br>
-          \ud83d\udcc4 <strong>LLM Guard \u2014 Context</strong> \u2014 ${isEs ? "Escanea documentos RAG ANTES de inyecci\u00f3n en contexto" : "Scans RAG documents BEFORE context injection"}<br>
-          \ud83d\udd12 <strong>System Prompt Hardening</strong> \u2014 ${isEs ? "Etiquetas XML de l\u00edmite + 5 reglas de rechazo (gratis, sin librer\u00eda)" : "XML boundary tags + 5 refusal rules (free, no library)"}<br>
-          \ud83e\udd16 <strong>Guardrail Model</strong> \u2014 ${isEs ? "Segunda llamada LLM eval\u00faa la respuesta (+1 llamada API)" : "Second LLM call evaluates the response (+1 API call)"}
+          \ud83d\udee1 <strong>Meta Prompt Guard 2</strong> \u2014 ${isEs ? "Escanea entradas ANTES del modelo (clasificador de 86M par\u00e1metros) \u2014 como un WAF con IA" : "Scans inputs BEFORE the model (86M parameter classifier) \u2014 <em>like an AI-powered WAF</em>"}<br>
+          \ud83d\udcca <strong>LLM Guard \u2014 Output</strong> \u2014 ${isEs ? "Escanea respuestas DESPU\u00c9S del modelo (credenciales, PII, c\u00f3digo) \u2014 como un DLP" : "Scans responses AFTER the model (credentials, PII, code) \u2014 <em>like a DLP scanner</em>"}<br>
+          \ud83d\udcc4 <strong>LLM Guard \u2014 Context</strong> \u2014 ${isEs ? "Escanea documentos RAG ANTES de inyecci\u00f3n en contexto \u2014 como validaci\u00f3n de entrada en APIs" : "Scans RAG documents BEFORE context injection \u2014 <em>like input validation on API responses</em>"}<br>
+          \ud83d\udd12 <strong>System Prompt Hardening</strong> \u2014 ${isEs ? "Etiquetas XML de l\u00edmite + 5 reglas de rechazo (gratis, sin librer\u00eda) \u2014 como endurecimiento de servidor" : "XML boundary tags + 5 refusal rules (free, no library) \u2014 <em>like server hardening best practices</em>"}<br>
+          \ud83e\udd16 <strong>Guardrail Model</strong> \u2014 ${isEs ? "Segunda llamada LLM eval\u00faa la respuesta (+1 llamada API) \u2014 como un IPS" : "Second LLM call evaluates the response (+1 API call) \u2014 <em>like an IPS inspecting outbound traffic</em>"}
         </div>
       </div>
 
