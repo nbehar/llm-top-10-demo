@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BSides Colombia 2026 — CTF de IA</title>
+  <meta name="description" content="Capture The Flag de Inteligencia Artificial — BSides Colombia 2026" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       CABECERA PRINCIPAL
+  ============================================================ -->
+  <header id="ctf-header">
+    <div class="header-izquierda">
+      <h1>🔐 BSides Colombia 2026 <span class="header-subtitulo">CTF de IA</span></h1>
+    </div>
+
+    <div class="header-centro">
+      <div id="countdown" class="countdown" role="timer" aria-label="Tiempo restante">
+        <div class="countdown-unidad">
+          <span class="countdown-valor" id="cd-dias">00</span>
+          <span class="countdown-etiqueta">días</span>
+        </div>
+        <span class="countdown-separador">:</span>
+        <div class="countdown-unidad">
+          <span class="countdown-valor" id="cd-horas">00</span>
+          <span class="countdown-etiqueta">horas</span>
+        </div>
+        <span class="countdown-separador">:</span>
+        <div class="countdown-unidad">
+          <span class="countdown-valor" id="cd-minutos">00</span>
+          <span class="countdown-etiqueta">minutos</span>
+        </div>
+        <span class="countdown-separador">:</span>
+        <div class="countdown-unidad">
+          <span class="countdown-valor" id="cd-segundos">00</span>
+          <span class="countdown-etiqueta">segundos</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-derecha">
+      <div id="participante-area">
+        <!-- JS inserta aquí el badge de apodo + botón de salir,
+             o el botón "Registrarse" si no hay sesión activa -->
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       CONTENIDO PRINCIPAL
+  ============================================================ -->
+  <main id="main-contenido">
+
+    <!-- COLUMNA IZQUIERDA: retos -->
+    <div id="columna-retos">
+
+      <div class="seccion-titulo">
+        <h2>Retos</h2>
+        <div class="filtros-categoria" id="filtros-categoria" role="group" aria-label="Filtrar por categoría">
+          <!-- Botones de filtro generados por JS -->
+        </div>
+      </div>
+
+      <!-- Cuadrícula de tarjetas de reto -->
+      <div id="grid-retos" class="grid-retos" role="list" aria-label="Lista de retos">
+        <!-- Poblado por JS -->
+        <div class="spinner-contenedor" id="spinner-retos" aria-label="Cargando retos...">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Cargando retos…</p>
+        </div>
+      </div>
+
+      <!-- Panel de detalle de reto (se muestra al seleccionar uno) -->
+      <div id="panel-reto" class="oculto" role="region" aria-label="Detalle del reto">
+
+        <div class="panel-reto-cabecera">
+          <div class="panel-reto-meta">
+            <span class="categoria-badge" id="panel-categoria"></span>
+            <span class="dificultad-badge" id="panel-dificultad"></span>
+            <span class="puntos-grande" id="panel-puntos"></span>
+          </div>
+          <button class="btn btn-ghost btn-cerrar-panel" id="btn-cerrar-panel" aria-label="Cerrar panel de reto">
+            ✕ Cerrar
+          </button>
+        </div>
+
+        <h3 id="panel-titulo-reto"></h3>
+        <p id="panel-descripcion" class="panel-descripcion"></p>
+
+        <!-- Primer acceso (first blood) -->
+        <div id="panel-primer-acceso" class="primer-acceso-aviso oculto">
+          <span class="primer-acceso-badge">🩸 Primer Acceso</span>
+          <span id="panel-primer-acceso-usuario"></span>
+        </div>
+
+        <!-- Pistas -->
+        <div id="panel-pistas" class="oculto">
+          <h4 class="pistas-titulo">Pistas</h4>
+          <div id="lista-pistas">
+            <!-- Pistas generadas por JS -->
+          </div>
+          <button class="btn btn-secundario btn-pedir-pista" id="btn-pedir-pista">
+            💡 Revelar siguiente pista
+          </button>
+        </div>
+
+        <!-- Área de prompt del participante -->
+        <div class="prompt-seccion">
+          <label for="prompt-usuario" class="prompt-etiqueta">
+            Tu prompt de ataque
+            <span class="prompt-etiqueta-hint">(envía al modelo del reto)</span>
+          </label>
+          <textarea
+            id="prompt-usuario"
+            class="prompt-area"
+            rows="5"
+            placeholder="Escribe aquí tu prompt de inyección o ataque…"
+            aria-label="Prompt de ataque"
+            spellcheck="false"
+          ></textarea>
+          <div class="prompt-acciones">
+            <button class="btn btn-primario" id="btn-ejecutar-ataque">
+              ▶ Ejecutar ataque
+            </button>
+            <button class="btn btn-secundario" id="btn-limpiar-prompt">
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <!-- Respuesta del modelo -->
+        <div id="bloque-respuesta" class="oculto">
+          <h4 class="respuesta-titulo">Respuesta del modelo</h4>
+          <div class="respuesta-modelo" id="respuesta-modelo" role="log" aria-live="polite" aria-label="Respuesta del modelo">
+          </div>
+        </div>
+
+        <!-- Envío de bandera -->
+        <div class="bandera-seccion" id="bandera-seccion">
+          <label for="input-bandera" class="bandera-etiqueta">
+            Bandera capturada
+          </label>
+          <div class="bandera-input-group">
+            <input
+              type="text"
+              id="input-bandera"
+              class="bandera-input"
+              placeholder="CTF{...}"
+              aria-label="Ingresa la bandera"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="btn btn-primario" id="btn-enviar-bandera">
+              Enviar 🚩
+            </button>
+          </div>
+          <div id="feedback-bandera" role="alert" aria-live="assertive">
+            <!-- JS inserta .feedback-correcto o .feedback-incorrecto aquí -->
+          </div>
+        </div>
+
+      </div>
+      <!-- fin #panel-reto -->
+
+    </div>
+    <!-- fin #columna-retos -->
+
+    <!-- COLUMNA DERECHA: marcador -->
+    <div id="columna-marcador">
+      <div class="marcador-cabecera">
+        <h2>Marcador en vivo</h2>
+        <span class="marcador-actualizacion" id="marcador-actualizacion" aria-live="polite"></span>
+      </div>
+
+      <div id="marcador" role="region" aria-label="Marcador en vivo">
+        <div class="spinner-contenedor" id="spinner-marcador" aria-label="Cargando marcador...">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Cargando…</p>
+        </div>
+        <!-- JS puebla la tabla .marcador-tabla -->
+      </div>
+
+      <!-- Mini-estadísticas del participante actual -->
+      <div id="mis-estadisticas" class="mis-estadisticas oculto">
+        <h3>Mis estadísticas</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-valor" id="stat-resueltos">0</span>
+            <span class="stat-etiqueta">Resueltos</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-valor" id="stat-puntos">0</span>
+            <span class="stat-etiqueta">Puntos</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-valor" id="stat-posicion">#—</span>
+            <span class="stat-etiqueta">Posición</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- fin #columna-marcador -->
+
+  </main>
+
+  <!-- ============================================================
+       MODAL DE REGISTRO
+  ============================================================ -->
+  <div id="modal-registro" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal-contenido">
+      <div class="modal-icono" aria-hidden="true">🔐</div>
+      <h2 class="modal-titulo" id="modal-titulo">¡Bienvenido al CTF!</h2>
+      <p class="modal-descripcion">
+        Elige un apodo para participar. Será visible en el marcador público.
+      </p>
+
+      <form id="form-registro" novalidate>
+        <div class="campo-grupo">
+          <label for="input-apodo" class="campo-etiqueta">Tu apodo</label>
+          <input
+            type="text"
+            id="input-apodo"
+            class="campo-input"
+            placeholder="ej. h4cker_col, p3ntester42…"
+            maxlength="24"
+            autocomplete="nickname"
+            spellcheck="false"
+            aria-required="true"
+            aria-describedby="apodo-error"
+          />
+          <span class="campo-contador" id="apodo-contador">0 / 24</span>
+        </div>
+
+        <div id="apodo-error" class="error-mensaje oculto" role="alert"></div>
+
+        <button type="submit" class="btn btn-primario btn-bloque" id="btn-unirse">
+          Unirse al CTF
+        </button>
+      </form>
+
+      <p class="modal-aviso">
+        No se requiere cuenta. Tu apodo queda vinculado a este navegador.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NOTIFICACIÓN TOAST
+  ============================================================ -->
+  <div
+    id="notificacion"
+    class="oculto"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    <span id="notificacion-icono" aria-hidden="true"></span>
+    <span id="notificacion-texto"></span>
+  </div>
+
+  <!-- ============================================================
+       SCRIPTS
+  ============================================================ -->
+  <script type="module" src="/static/js/app.js"></script>
+
+</body>
+</html>
